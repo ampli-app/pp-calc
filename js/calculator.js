@@ -471,6 +471,11 @@ class Calculator {
 
         scheduleBody.innerHTML = '';
         let paymentIndex = 1;
+        
+        // Calculate bonus amount from capital (not from payment amount)
+        const capitalElement = document.getElementById('capital');
+        const capital = parseFloat(capitalElement?.value) || 0;
+        const bonusAmount = capital * CONFIG.BONUS.RATE;
 
         schedule.payments.forEach((payment, index) => {
             const row = document.createElement('tr');
@@ -488,9 +493,6 @@ class Calculator {
             if (!payment.isBonusOnly) {
                 paymentIndex++;
             }
-
-            // Get bonus amount from CONFIG calculation
-            const bonusAmount = payment.amountNetto > 0 ? payment.amountNetto * CONFIG.BONUS.RATE : 0;
             
             row.innerHTML = `
                 <td>${displayPaymentNumber}</td>
@@ -528,7 +530,8 @@ class Calculator {
     }
 
     exportToCSV() {
-        CSVExporter.export();
+        // Temporary: call legacy function until CSVExporter.js is created
+        exportToCSV();
     }
 
     initializeInternalParamsToggle() {
