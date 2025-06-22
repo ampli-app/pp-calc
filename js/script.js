@@ -11,10 +11,21 @@ function initializeApp() {
     const passwordInput = document.getElementById('password');
     const loginError = document.getElementById('loginError');
 
+    // Check for session to keep user logged in on refresh
+    if (sessionStorage.getItem('isLoggedIn') === 'true') {
+        loginContainer.classList.add('hidden');
+        calculatorContainer.classList.remove('hidden');
+        const calculator = initializeCalculator();
+        calculator.addCSVExportButton();
+        console.log('Calculator initialized from session.');
+        return; // Skip login logic
+    }
+
     // Initialize login functionality
     if (loginBtn) {
         loginBtn.addEventListener('click', function() {
             // --- FOR TESTING: Login bypass ---
+            sessionStorage.setItem('isLoggedIn', 'true'); // Set session for bypass
             loginContainer.classList.add('hidden');
             calculatorContainer.classList.remove('hidden');
             const calculator = initializeCalculator();
@@ -27,6 +38,7 @@ function initializeApp() {
             const password = passwordInput.value;
 
             if (username === CONFIG.AUTH.USERNAME && password === CONFIG.AUTH.PASSWORD) {
+                sessionStorage.setItem('isLoggedIn', 'true'); // Remember login state
                 // Hide login, show calculator
                 loginContainer.classList.add('hidden');
                 calculatorContainer.classList.remove('hidden');
