@@ -32,87 +32,92 @@
     <div class="container hidden" id="calculatorContainer">
         <img src="https://partners.plenti.app/wp-content/uploads/2023/05/logo-plenti-partners.svg" alt="Logo firmy" style="max-width: 200px; display: block; margin: 0 auto 30px;">
         <h1>Kalkulator Harmonogramu Wypłat Partnerów</h1>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-step active" data-step="1">Dane firmy</div>
+            <div class="progress-step" data-step="2">Warunki finansowania</div>
+            <div class="progress-step" data-step="3">Wyniki</div>
+        </div>
         
         <div class="form">
-            <div class="form-group">
-                <label for="companyName">Nazwa przedsiębiorstwa:</label>
-                <input type="text" id="companyName" placeholder="Wprowadź nazwę firmy">
-            </div>
-            <div class="form-row">
+            <div class="form-step active" data-step="1">
                 <div class="form-group">
-                    <label for="taxForm">Forma opodatkowania:</label>
-                    <select id="taxForm">
-                        <option value="ryczalt">Ryczałt</option>
-                        <option value="liniowy">Liniowy</option>
-                    </select>
+                    <label for="companyName">Nazwa przedsiębiorstwa:</label>
+                    <input type="text" id="companyName" placeholder="Wprowadź nazwę firmy">
                 </div>
-                
-                <div class="form-group">
-                    <label for="taxRate">Stawka podatku:</label>
-                    <select id="taxRate">
-                        <option value="8.5">8,5%</option>
-                        <option value="12.5">12,5%</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="transferDate">Data wpływu przelewu do Plenti:</label>
-                    <input type="date" id="transferDate" value="2025-05-31">
-                </div>
-                
-                <div class="form-group">
-                    <label for="capital">Kapitał własny (zł netto):</label>
-                    <div class="input-group">
-                        <input type="number" id="capital" min="0" step="1000" value="100000">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="months">Na ile miesięcy:</label>
-                    <select id="months">
-                        <option value="12">12 miesięcy</option>
-                        <option value="18">18 miesięcy</option>
-                        <option value="24">24 miesięcy</option>
-                        <option value="30">30 miesięcy</option>
-                        <option value="36" selected>36 miesięcy</option>
-                        <option value="48">48 miesięcy</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="settlement">Rozliczenie:</label>
-                    <select id="settlement">
-                        <option value="monthly">Miesięczne</option>
-                        <option value="quarterly">Kwartalne</option>
-                        <option value="semiannual">Półroczne</option>
-                        <option value="annual" selected>Roczne</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="interestRate">IRR (dla całości kapitału):</label>
-                    <input type="number" id="interestRate" min="0" max="100" step="0.01" value="15" disabled>
-                </div>
-                <div class="form-group">
-                    <label for="finalPayment">Procent spłaty na koniec umowy (%):</label>
-                    <input type="number" id="finalPayment" min="0" max="100" step="1" value="60" disabled>
-                </div>
-                
-                <div class="form-group">
-                    </div>
-            </div>
-            
-            <div id="internalParams" class="internal-params hidden">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="baseInterestRate">Bazowa stopa (% rocznie):</label>
-                        <input type="number" id="baseInterestRate" min="0" max="100" step="0.01" value="12.5">
+                        <label for="taxForm">Forma opodatkowania:</label>
+                        <select id="taxForm">
+                            <option value="ryczalt">Ryczałt</option>
+                            <option value="liniowy">Liniowy</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taxRate">Stawka podatku:</label>
+                        <select id="taxRate">
+                            <option value="8.5">8,5%</option>
+                            <option value="12.5">12,5%</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step" data-step="2">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="transferDate">Data wpływu przelewu do Plenti:</label>
+                        <input type="date" id="transferDate" value="2025-05-31">
+                    </div>
+                    <div class="form-group">
+                        <label for="capital">Kapitał własny (zł netto):</label>
+                        <div class="input-group">
+                            <input type="number" id="capital" min="0" step="1000" value="100000">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="months">Na ile miesięcy:</label>
+                        <select id="months">
+                            <option value="12">12 miesięcy</option>
+                            <option value="18">18 miesięcy</option>
+                            <option value="24">24 miesięcy</option>
+                            <option value="30">30 miesięcy</option>
+                            <option value="36" selected>36 miesięcy</option>
+                            <option value="48">48 miesięcy</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="settlement">Rozliczenie:</label>
+                        <select id="settlement">
+                            <option value="monthly">Miesięczne</option>
+                            <option value="quarterly">Kwartalne</option>
+                            <option value="semiannual">Półroczne</option>
+                            <option value="annual" selected>Roczne</option>
+                        </select>
+                    </div>
+                </div>
+                 <div id="internalParams" class="internal-params">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="baseInterestRate">Bazowa stopa (% rocznie):</label>
+                            <input type="number" id="baseInterestRate" min="0" max="100" step="0.01" value="12.5">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-step" data-step="3">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="interestRate">IRR (dla całości kapitału):</label>
+                        <input type="number" id="interestRate" min="0" max="100" step="0.01" value="15" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="finalPayment">Procent spłaty na koniec umowy (%):</label>
+                        <input type="number" id="finalPayment" min="0" max="100" step="1" value="60" disabled>
                     </div>
                 </div>
             </div>
@@ -120,8 +125,9 @@
 
             
             <div class="button-row">
-                <button id="showCalculations" class="toggle-calculations">Pokaż obliczenia</button>
-                <button id="calculate" class="btn">Generuj harmonogram</button>
+                <button id="prevBtn" class="btn btn-secondary" style="display: none;">Wstecz</button>
+                <button id="nextBtn" class="btn">Dalej</button>
+                <button id="calculate" class="btn" style="display: none;">Generuj harmonogram</button>
             </div>
             
             <div id="calculationDetails" class="calculation-details">

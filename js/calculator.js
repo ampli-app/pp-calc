@@ -2,13 +2,22 @@
 class Calculator {
     constructor() {
         this.elements = {};
+        this.currentStep = 1;
         this.initializeElements();
         this.bindEvents();
+        this.goToStep(1); 
         this.calculateInterestRate();
     }
 
     initializeElements() {
         this.elements = {
+            // Step navigation
+            nextBtn: document.getElementById('nextBtn'),
+            prevBtn: document.getElementById('prevBtn'),
+            formSteps: document.querySelectorAll('.form-step'),
+            progressSteps: document.querySelectorAll('.progress-step'),
+
+            // Original elements
             companyNameInput: document.getElementById('companyName'),
             taxFormSelect: document.getElementById('taxForm'),
             taxRateSelect: document.getElementById('taxRate'),
@@ -18,7 +27,6 @@ class Calculator {
             resultsDiv: document.getElementById('results'),
             showCalculationsBtn: document.getElementById('showCalculations'),
             calculationDetails: document.getElementById('calculationDetails'),
-    
             calculationStep: document.getElementById('calculationStep'),
             downloadPdfBtn: document.getElementById('downloadPdf'),
             exportCSVBtn: document.getElementById('exportCSV')
@@ -26,32 +34,29 @@ class Calculator {
     }
 
     bindEvents() {
-        // Tax form change handler
+        // Step navigation
+        this.elements.nextBtn.addEventListener('click', () => this.handleNext());
+        this.elements.prevBtn.addEventListener('click', () => this.handlePrev());
+        this.elements.progressSteps.forEach(step => {
+            step.addEventListener('click', () => this.goToStep(parseInt(step.dataset.step)));
+        });
+
+        // Original event bindings
         if (this.elements.taxFormSelect) {
             this.elements.taxFormSelect.addEventListener('change', () => this.handleTaxFormChange());
         }
-
-        // Toggle schedule button
         if (this.elements.toggleScheduleBtn) {
             this.elements.toggleScheduleBtn.addEventListener('click', () => this.handleToggleSchedule());
         }
-
-        // Show calculations button
         if (this.elements.showCalculationsBtn) {
             this.elements.showCalculationsBtn.addEventListener('click', () => this.handleShowCalculations());
         }
-
-        // Calculate button
         if (this.elements.calculateBtn) {
             this.elements.calculateBtn.addEventListener('click', () => this.handleCalculate());
         }
-
-        // PDF download button
         if (this.elements.downloadPdfBtn) {
             this.elements.downloadPdfBtn.addEventListener('click', () => this.generatePDF());
         }
-
-        // CSV export button
         if (this.elements.exportCSVBtn) {
             this.elements.exportCSVBtn.addEventListener('click', () => this.exportToCSV());
         }
@@ -61,12 +66,36 @@ class Calculator {
             const element = document.getElementById(id);
             if (element) {
                 element.addEventListener('change', () => this.calculateInterestRate());
-            } else {
-                console.error(`Element with ID '${id}' not found in the DOM.`);
             }
         });
+    }
 
+    handleNext() {
+        if (this.currentStep < this.elements.formSteps.length) {
+            this.goToStep(this.currentStep + 1);
+        }
+    }
 
+    handlePrev() {
+        if (this.currentStep > 1) {
+            this.goToStep(this.currentStep - 1);
+        }
+    }
+
+    goToStep(stepNumber) {
+        this.currentStep = stepNumber;
+
+        this.elements.formSteps.forEach(step => {
+            step.classList.toggle('active', parseInt(step.dataset.step) === this.currentStep);
+        });
+
+        this.elements.progressSteps.forEach(step => {
+            step.classList.toggle('active', parseInt(step.dataset.step) === this.currentStep);
+        });
+
+        this.elements.prevBtn.style.display = this.currentStep > 1 ? 'inline-block' : 'none';
+        this.elements.nextBtn.style.display = this.currentStep < this.elements.formSteps.length ? 'inline-block' : 'none';
+        this.elements.calculateBtn.style.display = this.currentStep === this.elements.formSteps.length ? 'inline-block' : 'none';
     }
 
     handleTaxFormChange() {
