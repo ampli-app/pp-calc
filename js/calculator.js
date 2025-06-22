@@ -27,6 +27,7 @@ class Calculator {
 
             // Action buttons
             calculateBtn: document.getElementById('calculate'),
+            editDataBtn: document.getElementById('editDataBtn'),
             toggleScheduleBtn: document.getElementById('toggleSchedule'),
             downloadPdfBtn: document.getElementById('downloadPdf'),
             exportCSVBtn: document.getElementById('exportCSV'),
@@ -64,6 +65,9 @@ class Calculator {
         }
         if (this.elements.calculateBtn) {
             this.elements.calculateBtn.addEventListener('click', () => this.handleCalculate());
+        }
+        if (this.elements.editDataBtn) {
+            this.elements.editDataBtn.addEventListener('click', () => this.handleEditData());
         }
         if (this.elements.downloadPdfBtn) {
             this.elements.downloadPdfBtn.addEventListener('click', () => this.generatePDF());
@@ -173,6 +177,27 @@ class Calculator {
     handlePrev() {
         if (this.currentStep > 1) {
             this.goToStep(this.currentStep - 1);
+        }
+    }
+
+    handleEditData() {
+        // Hide results
+        if (this.elements.resultsDiv) {
+            this.elements.resultsDiv.classList.add('hidden');
+        }
+
+        // Show form
+        const formContainer = document.querySelector('.form-container');
+        if (formContainer) {
+            formContainer.style.display = 'block';
+        }
+
+        // Go back to step 3
+        this.goToStep(3);
+
+        // Update saved data to reflect the change
+        if (typeof saveFormData === 'function') {
+            saveFormData();
         }
     }
 

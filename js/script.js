@@ -138,6 +138,8 @@ function loadFormData() {
                 });
             }
 
+
+
             if (formData.scheduleVisible) {
                 const scheduleContainer = document.getElementById('scheduleContainer');
                 if (scheduleContainer) {
@@ -569,22 +571,22 @@ function updateButtonVisibility(stepNumber) {
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     const calculateBtn = document.getElementById('calculate');
+    const editDataBtn = document.getElementById('editDataBtn');
     const resultsDiv = document.getElementById('results');
-    
-    // Check if results are visible
+
     const resultsVisible = resultsDiv && !resultsDiv.classList.contains('hidden');
-    
-    // Don't show navigation buttons if results are visible
+
     if (resultsVisible) {
         if (prevBtn) prevBtn.style.display = 'none';
         if (nextBtn) nextBtn.style.display = 'none';
         if (calculateBtn) calculateBtn.style.display = 'none';
-        return;
+        if (editDataBtn) editDataBtn.style.display = 'inline-block';
+    } else {
+        if (editDataBtn) editDataBtn.style.display = 'none';
+        if (prevBtn) prevBtn.style.display = stepNumber > 1 ? 'inline-block' : 'none';
+        if (nextBtn) nextBtn.style.display = stepNumber < 3 ? 'inline-block' : 'none';
+        if (calculateBtn) calculateBtn.style.display = stepNumber === 3 ? 'inline-block' : 'none';
     }
-    
-    if (prevBtn) prevBtn.style.display = stepNumber > 1 ? 'inline-block' : 'none';
-    if (nextBtn) nextBtn.style.display = stepNumber < 3 ? 'inline-block' : 'none';
-    if (calculateBtn) calculateBtn.style.display = stepNumber === 3 ? 'inline-block' : 'none';
 }
 
 function exportToCSV() {
