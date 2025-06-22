@@ -190,7 +190,7 @@ class PDFGenerator {
                     {
                         columns: [
                             { text: 'Dokument wygenerowany automatycznie', style: 'footerText' },
-                            { text: new Date().toLocaleDateString('pl-PL'), style: 'footerText', alignment: 'right' }
+                            { text: new Date().toLocaleString('pl-PL'), style: 'footerText', alignment: 'right' }
                         ],
                         margin: [40, 0, 40, 0]
                     }
