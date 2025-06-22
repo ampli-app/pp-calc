@@ -721,7 +721,7 @@ class Calculator {
                 <td>${displayPaymentNumber}</td>
                 <td>${Utils.formatDate(payment.date)}</td>
                 <td>${Utils.formatCurrency(payment.amountNetto)}${payment.isBonus && !payment.isBonusOnly ? ' (bonus ' + Utils.formatCurrency(bonusAmount) + ')' : payment.isBonusOnly ? ' (bonus)' : ''}</td>
-                <td>${Utils.formatCurrency(payment.taxAmount)}</td>
+                <td class="tax-column">${Utils.formatCurrency(payment.taxAmount)}</td>
                 <td>${Utils.formatCurrency(currentPaymentAmountBrutto)}</td>
             `;
             

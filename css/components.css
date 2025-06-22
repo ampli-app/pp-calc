@@ -445,3 +445,8 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
     stroke: var(--primary-solid);
     color: var(--primary-solid);
 }
+
+/* Hide tax column in the schedule table */
+.tax-column {
+    display: none;
+}
