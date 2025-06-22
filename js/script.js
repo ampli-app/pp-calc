@@ -3,7 +3,12 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
-// Auto-save configuration
+// Global instances
+let loginManager;
+let autoSave;
+let buttonManager;
+
+// Auto-save configuration (moved to AutoSave class later)
 const AUTOSAVE_CONFIG = {
     storageKey: 'plenti_calculator_data',
     fieldsToSave: [
@@ -20,7 +25,54 @@ const AUTOSAVE_CONFIG = {
     ]
 };
 
-// Auto-save functions
+function initializeApp() {
+    // Initialize LoginManager
+    loginManager = new LoginManager({
+        testMode: true, // Set to false for production
+        username: 'admin',
+        password: 'password123'
+    });
+
+    // Initialize login with success callback
+    loginManager.initialize(() => {
+        onLoginSuccess();
+    });
+}
+
+/**
+ * Called when login is successful
+ */
+function onLoginSuccess() {
+    console.log('Login successful - initializing calculator...');
+    
+    // Initialize ButtonManager first (before loading data)
+    buttonManager = new ButtonManager();
+    
+    // Load saved data after showing calculator
+    setTimeout(() => {
+        loadFormData(); // TODO: Move to AutoSave module
+        setupAutoSave(); // TODO: Move to AutoSave module
+        addHeaderLogoutButton(); // Keep for now, will move to HeaderManager
+        
+        // Initialize ButtonManager after DOM is ready
+        buttonManager.initialize({
+            autoSave: { saveFormData }, // Pass legacy function for now
+            calculator: { calculate: calculateResults }, // Pass global function
+            pdfGenerator: { generate: generatePdfmakePDF }, // Pass global function
+            csvExporter: { export: exportToCSV } // Pass global function
+        });
+    }, 100);
+    
+    // Initialize calculator
+    const calculator = initializeCalculator();
+    calculator.addCSVExportButton();
+    
+    console.log('Calculator initialized successfully');
+}
+
+// Legacy functions - these will be moved to appropriate modules later
+
+// Auto-save functions (TODO: Move to AutoSave.js)
 function saveFormData() {
     const formData = {};
 
@@ -95,14 +147,6 @@ function loadFormData() {
             const resultsDiv = document.getElementById('results');
             if (resultsDiv) {
                 resultsDiv.classList.remove('hidden');
-                const prevBtn = document.getElementById('prevBtn');
-                if (prevBtn) {
-                    prevBtn.style.display = 'none';
-                }
-                const formContainer = document.querySelector('.form-container');
-                if (formContainer) {
-                    formContainer.style.display = 'none';
-                }
             }
 
             const resultIds = [
@@ -124,22 +168,6 @@ function loadFormData() {
                 }
             }
 
-            const toggleScheduleBtn = document.getElementById('toggleSchedule');
-            if (toggleScheduleBtn) {
-                toggleScheduleBtn.addEventListener('click', function() {
-                    const scheduleContainer = document.getElementById('scheduleContainer');
-                    scheduleContainer.classList.toggle('visible');
-                    if (scheduleContainer.classList.contains('visible')) {
-                        toggleScheduleBtn.textContent = 'Ukryj harmonogram wypłat';
-                    } else {
-                        toggleScheduleBtn.textContent = 'Pokaż harmonogram wypłat';
-                    }
-                    saveFormData(); // Save state after toggling schedule
-                });
-            }
-
-
-
             if (formData.scheduleVisible) {
                 const scheduleContainer = document.getElementById('scheduleContainer');
                 if (scheduleContainer) {
@@ -150,9 +178,9 @@ function loadFormData() {
             }
         }
 
-        // Restore current step if saved
-        if (formData.currentStep) {
-            restoreStep(formData.currentStep);
+        // Restore current step if saved - ButtonManager will handle this
+        if (formData.currentStep && buttonManager) {
+            buttonManager.setCurrentStep(parseInt(formData.currentStep));
         }
 
         console.log('Dane przywrócone z localStorage');
@@ -160,30 +188,6 @@ function loadFormData() {
         console.error('Błąd podczas przywracania danych:', error);
     }
 }
-
-function restoreStep(stepNumber) {
-    // Remove active class from all steps and form sections
-    document.querySelectorAll('.progress-step').forEach(step => {
-        step.classList.remove('active');
-    });
-    document.querySelectorAll('.form-step').forEach(section => {
-        section.classList.remove('active');
-    });
-    
-    // Add active class to correct step and form section
-    const targetStep = document.querySelector(`.progress-step[data-step="${stepNumber}"]`);
-    const targetSection = document.querySelector(`.form-step[data-step="${stepNumber}"]`);
-    
-    if (targetStep) targetStep.classList.add('active');
-    if (targetSection) targetSection.classList.add('active');
-    
-    // Update button visibility based on step
-    updateButtonVisibility(stepNumber);
-    
-    console.log('Przywrócono krok:', stepNumber);
-}
-
-
 
 function setupAutoSave() {
     // Add event listeners to all form fields
@@ -219,13 +223,6 @@ function setupAutoSave() {
         observer.observe(resultsDiv, { attributes: true });
     }
     
-    // Save when navigation buttons are clicked
-    document.addEventListener('click', function(e) {
-        if (e.target.id === 'nextBtn' || e.target.id === 'prevBtn' || e.target.id === 'calculate') {
-            setTimeout(saveFormData, 100); // Small delay to ensure DOM updates
-        }
-    });
-    
     console.log('Auto-save skonfigurowany');
 }
 
@@ -234,22 +231,21 @@ function clearSavedData() {
     console.log('Zapisane dane zostały wyczyszczone');
 }
 
-// Add logout functionality
+// Updated logout functionality - now uses LoginManager
 function logout() {
-    // Clear session
-    sessionStorage.removeItem('isLoggedIn');
-    // Clear saved form data
-    clearSavedData();
-    // Reload page to show login screen
-    location.reload();
+    if (loginManager) {
+        // Clear saved form data
+        clearSavedData();
+        // Use LoginManager logout
+        loginManager.logout();
+        // Reload page to ensure clean state
+        location.reload();
+    } else {
+        console.error('LoginManager not available');
+    }
 }
 
-// Add logout and clear data buttons
-function addActionButtons() {
-    // Funkcja pozostawiona pusta - przyciski są teraz w nagłówku
-}
-
-// Also add logout button to the header area
+// Header buttons (TODO: Move to HeaderManager)
 function addHeaderLogoutButton() {
     const container = document.getElementById('calculatorContainer');
     if (container && !document.getElementById('headerLogoutBtn')) {
@@ -293,98 +289,33 @@ function addHeaderLogoutButton() {
     }
 }
 
-function initializeApp() {
-    const loginContainer = document.getElementById('loginContainer');
-    const calculatorContainer = document.getElementById('calculatorContainer');
-    const loginBtn = document.getElementById('loginBtn');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const loginError = document.getElementById('loginError');
-
-    // Check for session to keep user logged in on refresh
-    if (sessionStorage.getItem('isLoggedIn') === 'true') {
-        loginContainer.classList.add('hidden');
-        calculatorContainer.classList.remove('hidden');
-        
-        // Load saved data after showing calculator
-        setTimeout(() => {
-            loadFormData();
-            setupAutoSave();
-            addHeaderLogoutButton(); // Add logout button to header
-        }, 100);
-        
-        const calculator = initializeCalculator();
-        calculator.addCSVExportButton();
-        
-        // Add action buttons to results
-        setTimeout(addActionButtons, 500);
-        
-        console.log('Calculator initialized from session.');
-        return; // Skip login logic
-    }
-
-    // Initialize login functionality
-    if (loginBtn) {
-        loginBtn.addEventListener('click', function() {
-            // --- FOR TESTING: Login bypass ---
-            sessionStorage.setItem('isLoggedIn', 'true'); // Set session for bypass
-            loginContainer.classList.add('hidden');
-            calculatorContainer.classList.remove('hidden');
-            
-            // Load saved data after successful login
-            setTimeout(() => {
-                loadFormData();
-                setupAutoSave();
-                addHeaderLogoutButton(); // Add logout button to header
-            }, 100);
-            
-            const calculator = initializeCalculator();
-            calculator.addCSVExportButton();
-            
-            // Add action buttons to results
-            setTimeout(addActionButtons, 500);
-            
-            console.log('Calculator initialized successfully (login bypassed)');
-            // --- END TESTING ---
-
-            /* --- ORIGINAL LOGIN LOGIC ---
-            const username = usernameInput.value;
-            const password = passwordInput.value;
-
-            if (username === CONFIG.AUTH.USERNAME && password === CONFIG.AUTH.PASSWORD) {
-                sessionStorage.setItem('isLoggedIn', 'true'); // Remember login state
-                // Hide login, show calculator
-                loginContainer.classList.add('hidden');
-                calculatorContainer.classList.remove('hidden');
-                
-                // Load saved data after successful login
-                setTimeout(() => {
-                    loadFormData();
-                    setupAutoSave();
-                    addHeaderLogoutButton(); // Add logout button to header
-                }, 100);
-                
-                // Initialize calculator after successful login
-                const calculator = initializeCalculator();
-                
-                // Add CSV export button
-                calculator.addCSVExportButton();
-                
-                // Add action buttons to results
-                setTimeout(addActionButtons, 500);
-                
-                console.log('Calculator initialized successfully');
-            } else {
-                loginError.style.display = 'block';
-            }
-            */
+// Export functions (TODO: Move to CSVExporter and PDFGenerator)
+function exportToCSV() {
+    const scheduleBody = document.getElementById('scheduleBody');
+    if (!scheduleBody) return;
+    
+    let csvContent = "Nr raty,Data płatności,Kwota netto (zł),Podatek (zł),Kwota brutto (zł)\n";
+    
+    Array.from(scheduleBody.children).forEach(row => {
+        const cells = Array.from(row.children);
+        const rowData = cells.map(cell => {
+            let text = cell.textContent.trim();
+            // Clean text from bonus information for CSV
+            text = text.replace(/\(w tym bonus.*?\)/g, '');
+            text = text.replace(/\(bonus\)/g, '');
+            return `"${text}"`;
         });
-    } else {
-        console.error('Login button not found');
-    }
+        csvContent += rowData.join(',') + '\n';
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `harmonogram_wyplat_${Utils.getTimestamp()}.csv`;
+    link.click();
 }
 
-// Legacy PDF generation function (to be moved to PDFGenerator.js)
+// Legacy PDF generation function (TODO: Move to PDFGenerator.js)
 function generatePdfmakePDF() {
     const companyNameInput = document.getElementById('companyName');
     const companyName = companyNameInput ? companyNameInput.value.trim() : '';
@@ -566,50 +497,13 @@ function generatePdfmakePDF() {
     pdfMake.createPdf(docDefinition).download(filename);
 }
 
-// Legacy CSV export function (to be moved to CSVExporter.js)
-function updateButtonVisibility(stepNumber) {
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const calculateBtn = document.getElementById('calculate');
-    const editDataBtn = document.getElementById('editDataBtn');
-    const resultsDiv = document.getElementById('results');
-
-    const resultsVisible = resultsDiv && !resultsDiv.classList.contains('hidden');
-
-    if (resultsVisible) {
-        if (prevBtn) prevBtn.style.display = 'none';
-        if (nextBtn) nextBtn.style.display = 'none';
-        if (calculateBtn) calculateBtn.style.display = 'none';
-        if (editDataBtn) editDataBtn.style.display = 'inline-block';
+// Wrapper function for global access (ButtonManager calls this)
+function calculateResults() {
+    // This function should call your existing calculator logic
+    // For now, assuming it exists as a global function
+    if (typeof window.calculateResults === 'function') {
+        window.calculateResults();
     } else {
-        if (editDataBtn) editDataBtn.style.display = 'none';
-        if (prevBtn) prevBtn.style.display = stepNumber > 1 ? 'inline-block' : 'none';
-        if (nextBtn) nextBtn.style.display = stepNumber < 3 ? 'inline-block' : 'none';
-        if (calculateBtn) calculateBtn.style.display = stepNumber === 3 ? 'inline-block' : 'none';
+        console.error('calculateResults function not found');
     }
-}
-
-function exportToCSV() {
-    const scheduleBody = document.getElementById('scheduleBody');
-    if (!scheduleBody) return;
-    
-    let csvContent = "Nr raty,Data płatności,Kwota netto (zł),Podatek (zł),Kwota brutto (zł)\n";
-    
-    Array.from(scheduleBody.children).forEach(row => {
-        const cells = Array.from(row.children);
-        const rowData = cells.map(cell => {
-            let text = cell.textContent.trim();
-            // Clean text from bonus information for CSV
-            text = text.replace(/\(w tym bonus.*?\)/g, '');
-            text = text.replace(/\(bonus\)/g, '');
-            return `"${text}"`;
-        });
-        csvContent += rowData.join(',') + '\n';
-    });
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `harmonogram_wyplat_${Utils.getTimestamp()}.csv`;
-    link.click();
 }
