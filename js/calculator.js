@@ -18,7 +18,7 @@ class Calculator {
             resultsDiv: document.getElementById('results'),
             showCalculationsBtn: document.getElementById('showCalculations'),
             calculationDetails: document.getElementById('calculationDetails'),
-            displayedInterestRate: document.getElementById('displayedInterestRate'),
+    
             calculationStep: document.getElementById('calculationStep'),
             downloadPdfBtn: document.getElementById('downloadPdf'),
             exportCSVBtn: document.getElementById('exportCSV')
@@ -66,8 +66,7 @@ class Calculator {
             }
         });
 
-        // Internal parameters toggle
-        this.initializeInternalParamsToggle();
+
     }
 
     handleTaxFormChange() {
@@ -280,11 +279,6 @@ class Calculator {
         
         // Update final payment percentage
         inputs.finalPaymentElement.value = multipliers.finalPaymentPercent;
-        
-        // Update displayed values
-        if (this.elements.displayedInterestRate) {
-            this.elements.displayedInterestRate.textContent = interestRate.toFixed(2) + '%';
-        }
         
         const interestRateElement = document.getElementById('interestRate');
         if (interestRateElement) {
@@ -538,23 +532,7 @@ class Calculator {
         CSVExporter.exportToCSV();
     }
 
-    initializeInternalParamsToggle() {
-        const toggleInternalParamsButton = document.getElementById('toggleInternalParams');
-        const internalParamsSection = document.getElementById('internalParams');
-        
-        if (toggleInternalParamsButton && internalParamsSection) {
-            toggleInternalParamsButton.addEventListener('click', function() {
-                internalParamsSection.classList.toggle('open');
-                toggleInternalParamsButton.classList.toggle('open');
-                
-                if (internalParamsSection.classList.contains('open')) {
-                    toggleInternalParamsButton.textContent = 'Ukryj parametry wewnętrzne';
-                } else {
-                    toggleInternalParamsButton.textContent = 'Pokaż parametry wewnętrzne';
-                }
-            });
-        }
-    }
+
 
     addCSVExportButton() {
         const buttonRow = document.querySelector('.button-row-results');
