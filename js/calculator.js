@@ -573,20 +573,33 @@ class Calculator {
             
             let nextPaymentMonth;
             if (settlement === 'quarterly') {
-                nextPaymentMonth = Math.ceil(currentMonth / 3) * 3;
+                // POPRAWKA DLA KWARTALNYCH - proste dodanie 3 miesięcy
+                nextPaymentMonth = currentMonth + 3;
+                
+                // Jeśli przekroczymy rok, przejdź do następnego roku
+                if (nextPaymentMonth > 12) {
+                    nextPaymentMonth -= 12;
+                    currentYear++;
+                }
             } else if (settlement === 'semiannual') {
-                nextPaymentMonth = Math.ceil(currentMonth / 6) * 6;
+                // POPRAWKA DLA PÓŁROCZNYCH - proste dodanie 6 miesięcy
+                nextPaymentMonth = currentMonth + 6;
+                
+                // Jeśli przekroczymy rok, przejdź do następnego roku
+                if (nextPaymentMonth > 12) {
+                    nextPaymentMonth -= 12;
+                    currentYear++;
+                }
             } else if (settlement === 'annual') {
                 // Dla rozliczeń rocznych - pierwsza wypłata dokładnie rok po transferze
                 nextPaymentMonth = currentMonth;
                 currentYear++; // Przesuwamy na następny rok
             }
     
-            // Dla rozliczeń innych niż roczne - sprawdzamy czy nie minął już termin
-            if (settlement !== 'annual' && nextPaymentMonth <= currentMonth) {
+            // Dla rozliczeń innych niż roczne I innych niż kwartalne I innych niż półroczne - sprawdzamy czy nie minął już termin
+            if (settlement !== 'annual' && settlement !== 'quarterly' && settlement !== 'semiannual' && nextPaymentMonth <= currentMonth) {
                 currentYear++;
-                if (settlement === 'semiannual') nextPaymentMonth = 6;
-                else if (settlement === 'quarterly') nextPaymentMonth = 3;
+                // Ten kod już nie jest potrzebny dla żadnego z obsługiwanych typów rozliczeń
             }
     
             // Tworzymy datę wypłaty (ostatni dzień miesiąca)
