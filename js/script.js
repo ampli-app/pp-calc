@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 let loginManager;
 let autoSave;
 let buttonManager;
+let calculator;
 
 // Auto-save configuration (moved to AutoSave class later)
 const AUTOSAVE_CONFIG = {
@@ -44,29 +45,29 @@ function initializeApp() {
  */
 function onLoginSuccess() {
     console.log('Login successful - initializing calculator...');
-    
+
     // Initialize ButtonManager first (before loading data)
     buttonManager = new ButtonManager();
-    
+    // Initialize calculator
+    calculator = initializeCalculator();
+
     // Load saved data after showing calculator
     setTimeout(() => {
         loadFormData(); // TODO: Move to AutoSave module
         setupAutoSave(); // TODO: Move to AutoSave module
         addHeaderLogoutButton(); // Keep for now, will move to HeaderManager
-        
+
         // Initialize ButtonManager after DOM is ready
         buttonManager.initialize({
             autoSave: { saveFormData }, // Pass legacy function for now
-            calculator: { calculate: calculateResults }, // Pass global function
+            calculator: { calculate: () => calculator.handleCalculate() }, // Pass calculator method
             pdfGenerator: { generate: generatePdfmakePDF }, // Pass global function
             csvExporter: { export: exportToCSV } // Pass global function
         });
     }, 100);
-    
-    // Initialize calculator
-    const calculator = initializeCalculator();
+
     calculator.addCSVExportButton();
-    
+
     console.log('Calculator initialized successfully');
 }
 
@@ -495,15 +496,4 @@ function generatePdfmakePDF() {
 
     // Generate PDF using pdfmake
     pdfMake.createPdf(docDefinition).download(filename);
-}
-
-// Wrapper function for global access (ButtonManager calls this)
-function calculateResults() {
-    // This function should call your existing calculator logic
-    // For now, assuming it exists as a global function
-    if (typeof window.calculateResults === 'function') {
-        window.calculateResults();
-    } else {
-        console.error('calculateResults function not found');
-    }
 }

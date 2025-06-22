@@ -178,17 +178,15 @@ class ButtonManager {
             
             // Show results
             this.showResults();
+            
+            // Hide the calculate button after successful calculation
+            const calculateBtn = document.getElementById(this.config.buttons.calculate);
+            if (calculateBtn) {
+                calculateBtn.style.display = 'none';
+            }
+            
             console.log('Calculation completed and results shown');
         }
-    }
-
-    /**
-     * Handle edit data button click (return to form)
-     */
-    handleEditData() {
-        this.hideResults();
-        this.showForm();
-        console.log('Returned to form editing mode');
     }
 
     /**
