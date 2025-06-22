@@ -100,6 +100,10 @@ class Calculator {
             }
         });
 
+        if (this.elements.capitalInput) {
+            this.elements.capitalInput.addEventListener('input', () => this.handleCapitalChange());
+        }
+
         // Interest rate calculation triggers
         ['baseInterestRate', 'months', 'capital', 'settlement', 'taxForm', 'taxRate'].forEach(id => {
             const element = document.getElementById(id);
@@ -107,6 +111,23 @@ class Calculator {
                 element.addEventListener('change', () => this.calculateInterestRate());
             }
         });
+    }
+
+    handleCapitalChange() {
+        const capitalValue = parseInt(this.elements.capitalInput.value, 10) || 0;
+        const monthlyOption = this.elements.settlementSelect.querySelector('option[value="monthly"]');
+
+        if (monthlyOption) {
+            if (capitalValue < 10000) {
+                monthlyOption.disabled = true;
+                if (this.elements.settlementSelect.value === 'monthly') {
+                    this.elements.settlementSelect.value = "";
+                    this.elements.settlementSelect.dispatchEvent(new Event('change'));
+                }
+            } else {
+                monthlyOption.disabled = false;
+            }
+        }
     }
 
     handleNext() {
