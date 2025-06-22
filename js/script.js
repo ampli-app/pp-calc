@@ -1,5 +1,3 @@
-const companyLogoBase64 = 'kod64';
-
 document.addEventListener('DOMContentLoaded', function() {
     const loginContainer = document.getElementById('loginContainer');
     const calculatorContainer = document.getElementById('calculatorContainer');
@@ -22,7 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
 
     function initializeCalculator() {
         const elements = {
@@ -291,10 +288,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             
                             // Ustal startDate na ostatni dzień NASTĘPNEGO miesiąca po dacie przelewu
                             const startDate = new Date(transferDate.getFullYear(), transferDate.getMonth() + 2, 0);
-                            console.log('Obliczona data startu:', formatDate(startDate));
+                            console.log('Obliczona data startu:', Utils.formatDate(startDate));
                             
-                            document.getElementById('startDate').textContent = formatDate(startDate);
-                            document.getElementById('capitalAmount').textContent = formatCurrency(capital);
+                            document.getElementById('startDate').textContent = Utils.formatDate(startDate);
+                            document.getElementById('capitalAmount').textContent = Utils.formatCurrency(capital);
                             document.getElementById('contractPeriod').textContent = months + ' miesięcy';
                             document.getElementById('interestRateValue').textContent = parseFloat(interestRate).toFixed(2) + '%';
                             
@@ -334,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             
                             let paymentPerPeriod = 0;
                             if (interestRate > 0) {
-                                paymentPerPeriod = pmt(adjustedRate, nper, pv, 0);
+                                paymentPerPeriod = Utils.pmt(adjustedRate, nper, pv, 0);
                             } else {
                                 paymentPerPeriod = -pv / nper;
                             }
@@ -459,11 +456,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 
                                 // Oblicz sumę wszystkich wypłat dla partnera (netto)
                                 const totalPaymentsAmount = payments.reduce((sum, payment) => sum + payment.amountNetto, 0);
-                                document.getElementById('totalPayments').textContent = formatCurrency(totalPaymentsAmount);
+                                document.getElementById('totalPayments').textContent = Utils.formatCurrency(totalPaymentsAmount);
                                 
                                 // Oblicz marżę partnera (suma wypłat - kapitał własny)
                                 const partnerMargin = totalPaymentsAmount - capital;
-                                document.getElementById('partnerMargin').textContent = formatCurrency(partnerMargin);
+                                document.getElementById('partnerMargin').textContent = Utils.formatCurrency(partnerMargin);
                                 
                                 // Oblicz całościową marżę z wynajmu (marża partnera / kapitał własny)
                                 const totalMarginPercent = (partnerMargin / capital) * 100;
@@ -501,7 +498,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     const row = document.createElement('tr');
                                     const paymentDate = payment.date;
                                     const currentPaymentAmountNetto = payment.amountNetto;
-                                    const currentPaymentAmountBrutto = currentPaymentAmountNetto * 1.23;    
+                                    const currentPaymentAmountBrutto = currentPaymentAmountNetto * CONFIG.VAT_RATE;    
                                     const currentTaxAmount = payment.taxAmount;    
 
                                     let displayPaymentNumber;
@@ -519,10 +516,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                     
                                     row.innerHTML = `
                                         <td>${displayPaymentNumber}</td>
-                                        <td>${formatDate(paymentDate)}</td>
-                                        <td>${formatCurrency(currentPaymentAmountNetto)}${payment.isBonus && !payment.isBonusOnly ? ' (w tym bonus ' + formatCurrency(bonusAmount) + ')' : payment.isBonusOnly ? ' (bonus)' : ''}</td>
-                                        <td>${formatCurrency(currentTaxAmount)}</td>    
-                                        <td>${formatCurrency(currentPaymentAmountBrutto)}</td>
+                                        <td>${Utils.formatDate(paymentDate)}</td>
+                                        <td>${Utils.formatCurrency(currentPaymentAmountNetto)}${payment.isBonus && !payment.isBonusOnly ? ' (w tym bonus ' + Utils.formatCurrency(bonusAmount) + ')' : payment.isBonusOnly ? ' (bonus)' : ''}</td>
+                                        <td>${Utils.formatCurrency(currentTaxAmount)}</td>    
+                                        <td>${Utils.formatCurrency(currentPaymentAmountBrutto)}</td>
                                     `;
                                     
                                     if(payment.isBonus) {
@@ -531,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                     scheduleBody.appendChild(row);
                                     console.log(`Wpis ${payment.isBonusOnly ? 'Bonus' : index + 1}:`, { // Zmieniono na index + 1 dla logów
-                                        date: formatDate(paymentDate),
+                                        date: Utils.formatDate(paymentDate),
                                         amountNetto: currentPaymentAmountNetto,
                                         taxAmount: currentTaxAmount,
                                         amountBrutto: currentPaymentAmountBrutto,
@@ -580,7 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-                // Inicjalizacja przycisku toggle dla parametrów wewnętrznych
+        // Inicjalizacja przycisku toggle dla parametrów wewnętrznych
         const toggleInternalParamsButton = document.getElementById('toggleInternalParams');
         const internalParamsSection = document.getElementById('internalParams');
         
@@ -731,65 +728,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         calculateInterestRate();
-        
-        function formatDate(date) {
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}.${month}.${year}`;
-        }
-        
-        function pmt(rate, nper, pv, fv = 0, type = 0) {
-            if (rate === 0) return -(pv + fv) / nper;
-            
-            const pvif = Math.pow(1 + rate, nper);
-            let pmt = rate / (pvif - 1) * -(pv * pvif + fv);
-            
-            if (type === 1) {
-                pmt = pmt / (1 + rate);
-            }
-            
-            return pmt;
-        }
-        
-        // Funkcja do obliczania IRR (wewnętrznej stopy zwrotu)
-        function calculateIRR(cashFlows, guess = 0.1) {
-            const maxIterations = 1000;
-            const tolerance = 0.0000001;
-            
-            let rate = guess;
-            
-            for (let i = 0; i < maxIterations; i++) {
-                let npv = 0;
-                let derivativeNpv = 0;
-                
-                for (let j = 0; j < cashFlows.length; j++) {
-                    const cashFlow = cashFlows[j];
-                    npv += cashFlow / Math.pow(1 + rate, j);
-                    derivativeNpv -= j * cashFlow / Math.pow(1 + rate, j + 1);
-                }
-                
-                // Zastosuj metodę Newtona-Raphsona do znalezienia miejsca zerowego
-                const newRate = rate - npv / derivativeNpv;
-                
-                // Sprawdź zbieżność
-                if (Math.abs(newRate - rate) < tolerance) {
-                    return newRate;
-                }
-                
-                rate = newRate;
-            }
-            
-            // Jeśli nie znaleziono zbieżności, zwróć najlepsze przybliżenie
-            return rate;
-        }
-        
-        function formatCurrency(amount) {
-            return amount.toLocaleString('pl-PL', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }) + ' zł';
-        }
 
         function generatePdfmakePDF() {
             const companyName = elements.companyNameInput.value.trim();
@@ -846,13 +784,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const docDefinition = {
                 content: [
-                    // Conditional logo display
-                    CONFIG.COMPANY_LOGO_BASE64 && CONFIG.COMPANY_LOGO_BASE64 !== 'kod64'
-                        image: CONFIG.COMPANY_LOGO_BASE64,
-                        width: 100,
-                        alignment: 'center',
-                        margin: [0, 0, 0, 20]
-                    } : null,
+                    // Conditional logo display - WYŁĄCZONE TYMCZASOWO
+                    null,
                     { text: 'Harmonogram Wypłat Partnerów', style: 'header', alignment: 'center' },
                     {
                         text: `Wygenerowano: ${new Date().toLocaleDateString('pl-PL', { 
@@ -951,8 +884,8 @@ document.addEventListener('DOMContentLoaded', function() {
             };
 
             // Generowanie nazwy pliku PDF
-            const sanitizedCompanyName = companyName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            const filename = `${sanitizedCompanyName}_harmonogram_${new Date().toISOString().split('T')[0]}.pdf`;
+            const sanitizedCompanyName = Utils.sanitizeFilename(companyName);
+            const filename = `${sanitizedCompanyName}_harmonogram_${Utils.getTimestamp()}.pdf`;
 
             // Użycie pdfmake do wygenerowania PDF
             pdfMake.createPdf(docDefinition).download(filename);
@@ -979,7 +912,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `harmonogram_wyplat_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `harmonogram_wyplat_${Utils.getTimestamp()}.csv`;
             link.click();
         }
 
@@ -996,7 +929,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Wywołaj funkcję dodającą przycisk CSV po załadowaniu kalkulatora
+        // Wywołuj funkcję dodającą przycisk CSV po załadowaniu kalkulatora
         addCSVExportButton();
     } // End of initializeCalculator function
 });
