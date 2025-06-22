@@ -125,18 +125,28 @@ class Calculator {
 
     handleTaxFormChange() {
         const taxForm = this.elements.taxFormSelect.value;
-        if (this.elements.taxRateSelect) {
-            this.elements.taxRateSelect.innerHTML = '';
-            
-            const rates = CONFIG.TAX_RATES[taxForm] || [];
-            rates.forEach(rate => {
-                this.elements.taxRateSelect.innerHTML += `<option value="${rate.value}">${rate.text}</option>`;
+        const taxRateSelect = this.elements.taxRateSelect;
+        const taxRates = CONFIG.TAX_RATES[taxForm];
+
+        taxRateSelect.innerHTML = ''; // Clear existing options
+
+        // Add placeholder
+        const placeholder = document.createElement('option');
+        placeholder.value = "";
+        placeholder.textContent = "Wybierz stawkę...";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        taxRateSelect.appendChild(placeholder);
+
+        if (taxRates) {
+            taxRates.forEach(rate => {
+                const option = document.createElement('option');
+                option.value = rate.value;
+                option.textContent = rate.text; // Corrected from rate.label
+                taxRateSelect.appendChild(option);
             });
-        } else {
-            console.error('Element taxRateSelect is null');
-            alert('Błąd: Element stawki podatku nie został znaleziony. Odśwież stronę lub skontaktuj się z administratorem.');
         }
-        this.calculateInterestRate();
+        this.calculateInterestRate(); // Recalculate on change
     }
 
     handleToggleSchedule() {
