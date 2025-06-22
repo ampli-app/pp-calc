@@ -415,23 +415,35 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 5px;
-    border-radius: 50%;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
     transition: background-color 0.3s ease;
     z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .logout-icon-btn svg {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     stroke: var(--text-secondary);
     transition: stroke 0.3s ease;
+}
+
+.logout-icon-btn span {
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    transition: color 0.3s ease;
 }
 
 .logout-icon-btn:hover {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-.logout-icon-btn:hover svg {
+.logout-icon-btn:hover svg,
+.logout-icon-btn:hover span {
     stroke: var(--primary-solid);
+    color: var(--primary-solid);
 }
