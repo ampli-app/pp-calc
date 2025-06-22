@@ -44,13 +44,12 @@ class PDFGenerator {
             { text: 'Nr raty', style: 'tableHeader', alignment: 'center' },
             { text: 'Data', style: 'tableHeader', alignment: 'center' },
             { text: 'Kwota netto', style: 'tableHeader', alignment: 'right' },
-            { text: 'Podatek', style: 'tableHeader', alignment: 'right' },
             { text: 'Kwota brutto', style: 'tableHeader', alignment: 'right' }
         ]);
 
         // Table data with improved formatting
         Array.from(scheduleBody.children).forEach(row => {
-            const cells = Array.from(row.children);
+            const cells = Array.from(row.children).filter(cell => !cell.classList.contains('tax-column'));
             const rowData = cells.map((cell, index) => {
                 let text = cell.textContent.trim();
                 let style = 'tableCell';
@@ -279,9 +278,10 @@ class PDFGenerator {
             stack: [
                 { text: 'Harmonogram płatności', style: 'sectionTitle' },
                 {
+                    alignment: 'center',
                     table: {
                         headerRows: 1,
-                        widths: [60, 80, '*', 80, '*'],
+                        widths: [60, 80, '*', '*'],
                         body: tableRows
                     },
                     layout: {
