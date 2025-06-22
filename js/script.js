@@ -143,12 +143,24 @@ function loadFormData() {
             }
         });
 
-        // Restore results if they were visible
-        if (formData.resultsVisible && formData.resultsData) {
-            const resultsDiv = document.getElementById('results');
-            if (resultsDiv) {
-                resultsDiv.classList.remove('hidden');
-            }
+       // Restore results if they were visible
+if (formData.resultsVisible && formData.resultsData) {
+    const resultsDiv = document.getElementById('results');
+    if (resultsDiv) {
+        resultsDiv.classList.remove('hidden');
+    }
+    
+    // Ukryj formularz
+    const formContainer = document.querySelector('.form');
+    if (formContainer) {
+        formContainer.style.display = 'none';
+    }
+    
+    // Informuj ButtonManager że wyniki są widoczne
+    if (buttonManager) {
+        buttonManager.isResultsVisible = true;
+        buttonManager.updateButtonVisibility();
+    }
 
             const resultIds = [
                 'transferDateDisplay', 'capitalAmount', 'contractPeriod',

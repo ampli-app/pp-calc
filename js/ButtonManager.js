@@ -21,7 +21,7 @@ class ButtonManager {
             // Container IDs
             containers: {
                 results: 'results',
-                formContainer: '.form-container',
+                formContainer: '.form',
                 scheduleContainer: 'scheduleContainer'
             },
             
@@ -188,6 +188,51 @@ class ButtonManager {
             console.log('Calculation completed and results shown');
         }
     }
+
+ /**
+     * Handle edit data button click (return to form)
+     */
+ handleEditData() {
+    // Hide the edit button itself
+    const editBtn = document.getElementById(this.config.buttons.editData);
+    if (editBtn) {
+        editBtn.style.display = 'none';
+    }
+    
+    // Hide results
+    this.hideResults();
+    
+    // Show form
+    this.showForm();
+    
+    // Reset to the last step (step 3) where user can modify data
+    this.currentStep = this.config.totalSteps;
+    this.navigateToStep(this.currentStep);
+    
+    // Ensure calculate button is visible again
+    const calculateBtn = document.getElementById(this.config.buttons.calculate);
+    if (calculateBtn) {
+        calculateBtn.style.display = 'inline-block';
+    }
+    
+    // Hide schedule if it was visible
+    const scheduleContainer = document.getElementById(this.config.containers.scheduleContainer);
+    const toggleBtn = document.getElementById(this.config.buttons.toggleSchedule);
+    if (scheduleContainer && scheduleContainer.classList.contains('visible')) {
+        scheduleContainer.classList.remove('visible');
+        if (toggleBtn) {
+            toggleBtn.textContent = this.config.texts.showSchedule;
+        }
+    }
+    
+    // Optional: Clear previous results to force recalculation
+    const scheduleBody = document.getElementById('scheduleBody');
+    if (scheduleBody) {
+        scheduleBody.innerHTML = '';
+    }
+    
+    console.log('Returned to form editing mode at step 3');
+}
 
     /**
      * Handle PDF generation
@@ -387,30 +432,36 @@ class ButtonManager {
         console.log(`Current state detected - Step: ${this.currentStep}, Results: ${this.isResultsVisible}`);
     }
 
-    /**
+/**
      * Validate current step before proceeding
      * @returns {boolean} True if current step is valid
      */
-    validateCurrentStep() {
-        // Basic validation - can be extended
-        const currentSection = document.querySelector(`.form-step[data-step="${this.currentStep}"].active`);
-        if (!currentSection) {
-            console.warn('Current step section not found');
-            return false;
-        }
-
-        // Check required fields in current step
-        const requiredFields = currentSection.querySelectorAll('input[required], select[required]');
-        for (let field of requiredFields) {
-            if (!field.value.trim()) {
-                field.focus();
-                alert(`Proszę wypełnić pole: ${field.previousElementSibling?.textContent || field.name || 'wymagane pole'}`);
-                return false;
-            }
-        }
-
+validateCurrentStep() {
+    // Sprawdź czy jesteśmy w widoku wyników - wtedy nie ma co walidować
+    if (this.isResultsVisible) {
         return true;
     }
+    
+    // Znajdź aktualny krok bez wymagania klasy .active
+    const currentSection = document.querySelector(`.form-step[data-step="${this.currentStep}"]`);
+    if (!currentSection) {
+        console.warn('Current step section not found');
+        return false;
+    }
+
+    // Sprawdź tylko widoczne pola (element może być ukryty ale nadal w DOM)
+    const requiredFields = currentSection.querySelectorAll('input:not([disabled]), select:not([disabled])');
+    for (let field of requiredFields) {
+        // Sprawdź tylko jeśli pole jest widoczne
+        if (field.offsetParent !== null && !field.value.trim()) {
+            field.focus();
+            alert(`Proszę wypełnić pole: ${field.previousElementSibling?.textContent || field.name || 'wymagane pole'}`);
+            return false;
+        }
+    }
+
+    return true;
+}
 
     /**
      * Set current step manually
