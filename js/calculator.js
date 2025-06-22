@@ -187,7 +187,7 @@ class Calculator {
         }
 
         // Show form
-        const formContainer = document.querySelector('.form-container');
+        const formContainer = document.querySelector('.form');
         if (formContainer) {
             formContainer.style.display = 'block';
         }
@@ -259,9 +259,7 @@ class Calculator {
             step.classList.toggle('active', parseInt(step.dataset.step) === this.currentStep);
         });
 
-        this.elements.prevBtn.style.display = this.currentStep > 1 ? 'inline-block' : 'none';
-        this.elements.nextBtn.style.display = this.currentStep < this.elements.formSteps.length ? 'inline-block' : 'none';
-        this.elements.calculateBtn.style.display = this.currentStep === this.elements.formSteps.length ? 'inline-block' : 'none';
+       
     }
 
     handleTaxFormChange() {
@@ -738,6 +736,18 @@ class Calculator {
             this.elements.resultsDiv.classList.remove('hidden');
         }
         
+        // Ukryj formularz
+        const formContainer = document.querySelector('.form');
+        if (formContainer) {
+            formContainer.style.display = 'none';
+        }
+        
+        // Informuj ButtonManager o pokazaniu wyników
+        if (window.buttonManager && typeof window.buttonManager.showResults === 'function') {
+            window.buttonManager.showResults();
+        }
+        
+        // Resetuj widok harmonogramu
         if (this.elements.toggleScheduleBtn) {
             this.elements.toggleScheduleBtn.classList.remove('open');
             this.elements.toggleScheduleBtn.textContent = 'Pokaż harmonogram wypłat';
