@@ -530,8 +530,7 @@ class Calculator {
     }
 
     exportToCSV() {
-        // Temporary: call legacy function until CSVExporter.js is created
-        exportToCSV();
+        CSVExporter.exportToCSV();
     }
 
     initializeInternalParamsToggle() {
