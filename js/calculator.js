@@ -21,6 +21,7 @@ class Calculator {
             companyNameInput: document.getElementById('companyName'),
             taxFormSelect: document.getElementById('taxForm'),
             taxRateSelect: document.getElementById('taxRate'),
+            transferDate: document.getElementById('transferDate'),
             calculateBtn: document.getElementById('calculate'),
             toggleScheduleBtn: document.getElementById('toggleSchedule'),
             scheduleContainer: document.getElementById('scheduleContainer'),
@@ -31,6 +32,10 @@ class Calculator {
             downloadPdfBtn: document.getElementById('downloadPdf'),
             exportCSVBtn: document.getElementById('exportCSV')
         };
+
+        if (this.elements.transferDate) {
+            this.elements.transferDate.min = new Date().toISOString().split('T')[0];
+        }
     }
 
     bindEvents() {
