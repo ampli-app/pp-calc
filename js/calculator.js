@@ -128,6 +128,9 @@ class Calculator {
         const taxRateSelect = this.elements.taxRateSelect;
         const taxRates = CONFIG.TAX_RATES[taxForm];
 
+        // Enable or disable the tax rate select based on tax form selection
+        taxRateSelect.disabled = !taxForm;
+
         taxRateSelect.innerHTML = ''; // Clear existing options
 
         // Add placeholder
@@ -142,7 +145,7 @@ class Calculator {
             taxRates.forEach(rate => {
                 const option = document.createElement('option');
                 option.value = rate.value;
-                option.textContent = rate.text; // Corrected from rate.label
+                option.textContent = rate.text;
                 taxRateSelect.appendChild(option);
             });
         }
