@@ -1,0 +1,568 @@
+// Calculator Business Logic
+class Calculator {
+    constructor() {
+        this.elements = {};
+        this.initializeElements();
+        this.bindEvents();
+        this.calculateInterestRate();
+    }
+
+    initializeElements() {
+        this.elements = {
+            companyNameInput: document.getElementById('companyName'),
+            taxFormSelect: document.getElementById('taxForm'),
+            taxRateSelect: document.getElementById('taxRate'),
+            calculateBtn: document.getElementById('calculate'),
+            toggleScheduleBtn: document.getElementById('toggleSchedule'),
+            scheduleContainer: document.getElementById('scheduleContainer'),
+            resultsDiv: document.getElementById('results'),
+            showCalculationsBtn: document.getElementById('showCalculations'),
+            calculationDetails: document.getElementById('calculationDetails'),
+            displayedInterestRate: document.getElementById('displayedInterestRate'),
+            calculationStep: document.getElementById('calculationStep'),
+            downloadPdfBtn: document.getElementById('downloadPdf'),
+            exportCSVBtn: document.getElementById('exportCSV')
+        };
+    }
+
+    bindEvents() {
+        // Tax form change handler
+        if (this.elements.taxFormSelect) {
+            this.elements.taxFormSelect.addEventListener('change', () => this.handleTaxFormChange());
+        }
+
+        // Toggle schedule button
+        if (this.elements.toggleScheduleBtn) {
+            this.elements.toggleScheduleBtn.addEventListener('click', () => this.handleToggleSchedule());
+        }
+
+        // Show calculations button
+        if (this.elements.showCalculationsBtn) {
+            this.elements.showCalculationsBtn.addEventListener('click', () => this.handleShowCalculations());
+        }
+
+        // Calculate button
+        if (this.elements.calculateBtn) {
+            this.elements.calculateBtn.addEventListener('click', () => this.handleCalculate());
+        }
+
+        // PDF download button
+        if (this.elements.downloadPdfBtn) {
+            this.elements.downloadPdfBtn.addEventListener('click', () => this.generatePDF());
+        }
+
+        // CSV export button
+        if (this.elements.exportCSVBtn) {
+            this.elements.exportCSVBtn.addEventListener('click', () => this.exportToCSV());
+        }
+
+        // Interest rate calculation triggers
+        ['baseInterestRate', 'months', 'capital', 'settlement', 'taxForm', 'taxRate'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('change', () => this.calculateInterestRate());
+            } else {
+                console.error(`Element with ID '${id}' not found in the DOM.`);
+            }
+        });
+
+        // Internal parameters toggle
+        this.initializeInternalParamsToggle();
+    }
+
+    handleTaxFormChange() {
+        const taxForm = this.elements.taxFormSelect.value;
+        if (this.elements.taxRateSelect) {
+            this.elements.taxRateSelect.innerHTML = '';
+            
+            const rates = CONFIG.TAX_RATES[taxForm] || [];
+            rates.forEach(rate => {
+                this.elements.taxRateSelect.innerHTML += `<option value="${rate.value}">${rate.text}</option>`;
+            });
+        } else {
+            console.error('Element taxRateSelect is null');
+            alert('Błąd: Element stawki podatku nie został znaleziony. Odśwież stronę lub skontaktuj się z administratorem.');
+        }
+        this.calculateInterestRate();
+    }
+
+    handleToggleSchedule() {
+        this.elements.toggleScheduleBtn.classList.toggle('open');
+        if (this.elements.scheduleContainer) {
+            this.elements.scheduleContainer.classList.toggle('open');
+        } else {
+            console.error('Element scheduleContainer is null');
+            alert('Błąd: Kontener harmonogramu nie został znaleziony. Odśwież stronę.');
+        }
+        
+        const isOpen = this.elements.toggleScheduleBtn.classList.contains('open');
+        this.elements.toggleScheduleBtn.textContent = isOpen ? 'Ukryj harmonogram wypłat' : 'Pokaż harmonogram wypłat';
+    }
+
+    handleShowCalculations() {
+        const calculationDetails = this.elements.calculationDetails;
+        
+        if (!calculationDetails) {
+            console.error('Element calculationDetails is null');
+            alert('Błąd: Sekcja obliczeń nie została znaleziona. Odśwież stronę.');
+            return;
+        }
+
+        this.elements.showCalculationsBtn.classList.toggle('open');
+        const isCurrentlyVisible = calculationDetails.style.display === 'block';
+        
+        if (isCurrentlyVisible) {
+            calculationDetails.style.display = 'none';
+            this.elements.showCalculationsBtn.textContent = 'Pokaż obliczenia';
+        } else {
+            this.displayCalculationDetails();
+            calculationDetails.style.display = 'block';
+            this.elements.showCalculationsBtn.textContent = 'Ukryj obliczenia';
+        }
+    }
+
+    displayCalculationDetails() {
+        const inputs = this.getCalculationInputs();
+        if (!inputs.isValid) return;
+
+        const multipliers = this.getMultipliers(inputs);
+        const interestRate = this.calculateFinalInterestRate(inputs.baseInterestRate, multipliers);
+        
+        inputs.finalPaymentElement.value = multipliers.finalPaymentPercent;
+        
+        if (this.elements.calculationStep) {
+            this.elements.calculationStep.textContent = `
+                Bazowa stopa: ${inputs.baseInterestRate}%
+                × Mnożnik okresu: ${multipliers.multiplierMonths.toFixed(8)}
+                × Mnożnik kapitału: ${multipliers.multiplierCapital.toFixed(8)}
+                × Mnożnik procentu spłaty: ${multipliers.multiplierFinalPayment}
+                × Mnożnik częstotliwości: ${multipliers.multiplierFreq.toFixed(8)}
+                = Stopa procentowa: ${interestRate.toFixed(8)}%
+            `;
+        }
+    }
+
+    handleCalculate() {
+        const inputs = this.getPaymentCalculationInputs();
+        if (!inputs.isValid) return;
+
+        const schedule = this.calculatePaymentSchedule(inputs);
+        this.displayResults(inputs, schedule);
+        this.generateScheduleTable(schedule);
+        this.showResults();
+    }
+
+    getCalculationInputs() {
+        const elements = {
+            baseInterestRateElement: document.getElementById('baseInterestRate'),
+            monthsElement: document.getElementById('months'),
+            capitalElement: document.getElementById('capital'),
+            finalPaymentElement: document.getElementById('finalPayment'),
+            settlementElement: document.getElementById('settlement'),
+            taxFormElement: document.getElementById('taxForm')
+        };
+
+        // Validation
+        const missingElements = Object.entries(elements).filter(([key, element]) => !element);
+        if (missingElements.length > 0) {
+            console.error('Missing elements:', missingElements);
+            alert('Błąd: Jedno lub więcej pól formularza nie zostało znalezione. Sprawdź formularz lub odśwież stronę.');
+            return { isValid: false };
+        }
+
+        return {
+            isValid: true,
+            baseInterestRate: parseFloat(elements.baseInterestRateElement.value) || 0,
+            months: parseInt(elements.monthsElement.value) || 12,
+            capital: parseFloat(elements.capitalElement.value) || 0,
+            settlement: elements.settlementElement.value,
+            taxForm: elements.taxFormElement.value,
+            finalPaymentElement: elements.finalPaymentElement
+        };
+    }
+
+    getPaymentCalculationInputs() {
+        const elements = {
+            transferDateElement: document.getElementById('transferDate'),
+            capitalElement: document.getElementById('capital'),
+            monthsElement: document.getElementById('months'),
+            settlementElement: document.getElementById('settlement'),
+            finalPaymentElement: document.getElementById('finalPayment'),
+            interestRateElement: document.getElementById('interestRate'),
+            taxRateElement: document.getElementById('taxRate')
+        };
+
+        // Validation
+        const missingElements = Object.entries(elements).filter(([key, element]) => !element);
+        if (missingElements.length > 0) {
+            console.error('Missing elements:', missingElements);
+            alert('Wprowadź poprawną datę, kapitał własny, stopę procentową, procent spłaty i stawkę podatku!');
+            return { isValid: false };
+        }
+
+        const transferDate = new Date(elements.transferDateElement.value);
+        const capital = parseFloat(elements.capitalElement.value) || 0;
+        const months = parseInt(elements.monthsElement.value) || 12;
+        const settlement = elements.settlementElement.value;
+        const finalPaymentPercent = parseFloat(elements.finalPaymentElement.value) || 0;
+        const interestRate = parseFloat(elements.interestRateElement.getAttribute('data-full-value') || elements.interestRateElement.value) || 0;
+        const taxRate = parseFloat(elements.taxRateElement.value) || 0;
+
+        // Data validation
+        if (isNaN(transferDate.getTime()) || capital <= 0 || isNaN(interestRate) || isNaN(finalPaymentPercent) || isNaN(taxRate)) {
+            alert('Wprowadź poprawną datę, kapitał własny, stopę procentową, procent spłaty i stawkę podatku!');
+            return { isValid: false };
+        }
+
+        return {
+            isValid: true,
+            transferDate,
+            capital,
+            months,
+            settlement,
+            finalPaymentPercent,
+            interestRate,
+            taxRate
+        };
+    }
+
+    getMultipliers(inputs) {
+        // Get frequency multiplier from CONFIG
+        const settlementConfig = CONFIG.SETTLEMENT[inputs.settlement] || CONFIG.SETTLEMENT.annual;
+        const freq = settlementConfig.freq;
+        const multiplierFreq = CONFIG.MULTIPLIERS.FREQUENCY[inputs.settlement] || CONFIG.MULTIPLIERS.FREQUENCY.annual;
+
+        // Get months multiplier from CONFIG
+        const multiplierMonths = CONFIG.MULTIPLIERS.MONTHS[inputs.months] || 1.0;
+
+        // Get capital multiplier from CONFIG
+        const multiplierCapital = this.getCapitalMultiplier(inputs.capital);
+
+        // Get final payment percent from CONFIG
+        const finalPaymentPercent = this.getFinalPaymentPercent(inputs.months, inputs.taxForm);
+
+        return {
+            freq,
+            multiplierFreq,
+            multiplierMonths,
+            multiplierCapital,
+            finalPaymentPercent,
+            multiplierFinalPayment: CONFIG.MULTIPLIERS.FINAL_PAYMENT
+        };
+    }
+
+    getCapitalMultiplier(capital) {
+        const capitalRange = CONFIG.MULTIPLIERS.CAPITAL.find(range => 
+            capital >= range.min && capital <= range.max
+        );
+        return capitalRange ? capitalRange.multiplier : 1.0000;
+    }
+
+    getFinalPaymentPercent(months, taxForm) {
+        const monthConfig = CONFIG.FINAL_PAYMENT_PERCENT[months];
+        if (!monthConfig) {
+            return taxForm === 'liniowy' ? 25.0 : 60.0;
+        }
+        return monthConfig[taxForm] || (taxForm === 'liniowy' ? 25.0 : 60.0);
+    }
+
+    calculateFinalInterestRate(baseRate, multipliers) {
+        return baseRate * multipliers.multiplierMonths * multipliers.multiplierCapital * 
+               multipliers.multiplierFinalPayment * multipliers.multiplierFreq;
+    }
+
+    calculateInterestRate() {
+        const inputs = this.getCalculationInputs();
+        if (!inputs.isValid) return 0;
+
+        const multipliers = this.getMultipliers(inputs);
+        const interestRate = this.calculateFinalInterestRate(inputs.baseInterestRate, multipliers);
+        
+        // Update final payment percentage
+        inputs.finalPaymentElement.value = multipliers.finalPaymentPercent;
+        
+        // Update displayed values
+        if (this.elements.displayedInterestRate) {
+            this.elements.displayedInterestRate.textContent = interestRate.toFixed(2) + '%';
+        }
+        
+        const interestRateElement = document.getElementById('interestRate');
+        if (interestRateElement) {
+            interestRateElement.value = interestRate.toFixed(2);
+            interestRateElement.setAttribute('data-full-value', interestRate.toFixed(8));
+        }
+        
+        return interestRate;
+    }
+
+    calculatePaymentSchedule(inputs) {
+        const startDate = new Date(inputs.transferDate.getFullYear(), inputs.transferDate.getMonth() + 2, 0);
+        const settlementConfig = CONFIG.SETTLEMENT[inputs.settlement];
+        const freq = settlementConfig.freq;
+        const numberOfPayments = Math.ceil(inputs.months / freq);
+        
+        const finalPaymentAmount = (inputs.capital * inputs.finalPaymentPercent) / 100;
+        const adjustedRate = (inputs.interestRate / 100) / 12 * freq;
+        const pv = -(inputs.capital - finalPaymentAmount);
+        
+        let paymentPerPeriod = 0;
+        if (inputs.interestRate > 0) {
+            paymentPerPeriod = Utils.pmt(adjustedRate, numberOfPayments, pv, 0);
+        } else {
+            paymentPerPeriod = -pv / numberOfPayments;
+        }
+        
+        const interestOnFinalPayment = adjustedRate * finalPaymentAmount;
+        const standardPayment = paymentPerPeriod + interestOnFinalPayment;
+        
+        // Bonus calculation
+        const transferDay = inputs.transferDate.getDate();
+        const isBonusApplicable = transferDay <= CONFIG.BONUS.DEADLINE_DAY;
+        const bonusAmount = isBonusApplicable ? inputs.capital * CONFIG.BONUS.RATE : 0;
+        
+        const payments = this.generatePayments({
+            startDate,
+            settlement: inputs.settlement,
+            freq,
+            numberOfPayments,
+            standardPayment,
+            finalPaymentAmount,
+            taxRate: inputs.taxRate,
+            isBonusApplicable,
+            bonusAmount,
+            transferDate: inputs.transferDate
+        });
+
+        return {
+            startDate,
+            payments,
+            settlementText: settlementConfig.text,
+            totalPayments: payments.reduce((sum, payment) => sum + payment.amountNetto, 0),
+            partnerMargin: null, // Will be calculated after total
+            totalMarginPercent: null // Will be calculated after total
+        };
+    }
+
+    generatePayments(params) {
+        const {
+            startDate, settlement, freq, numberOfPayments, standardPayment,
+            finalPaymentAmount, taxRate, isBonusApplicable, bonusAmount, transferDate
+        } = params;
+
+        let payments = [];
+        const bonusDate = new Date(startDate.getFullYear(), startDate.getMonth() + CONFIG.BONUS.MONTHS_DELAY, 0);
+        
+        // Calculate first payment date
+        let firstPaymentCalculatedDate = this.calculateFirstPaymentDate(startDate, settlement, freq, transferDate);
+        
+        // Generate regular payments
+        for (let i = 0; i < numberOfPayments; i++) {
+            const paymentDate = new Date(
+                firstPaymentCalculatedDate.getFullYear(),
+                firstPaymentCalculatedDate.getMonth() + (i * freq) + 1,
+                0
+            );
+            
+            let currentPaymentAmountNetto;
+            const isLastPayment = i === numberOfPayments - 1;
+            
+            if (isLastPayment) {
+                currentPaymentAmountNetto = standardPayment + finalPaymentAmount;
+            } else {
+                currentPaymentAmountNetto = standardPayment;
+            }
+
+            const taxAmount = (currentPaymentAmountNetto * taxRate) / 100;
+            
+            // Add bonus for monthly and quarterly
+            const isBonusMonth = isBonusApplicable && 
+                ((settlement === 'monthly' && i === 2) || 
+                (settlement === 'quarterly' && i === 0));
+            
+            if (isBonusMonth) {
+                currentPaymentAmountNetto += bonusAmount;
+            }
+
+            payments.push({
+                date: paymentDate,
+                amountNetto: currentPaymentAmountNetto,
+                taxAmount: taxAmount,
+                isLast: isLastPayment,
+                isBonus: isBonusMonth,
+                isBonusOnly: false
+            });
+        }
+        
+        // Add separate bonus payment for semiannual and annual
+        if (isBonusApplicable && (settlement === 'semiannual' || settlement === 'annual')) {
+            const bonusTaxAmount = (bonusAmount * taxRate) / 100;
+            payments.push({
+                date: bonusDate,
+                amountNetto: bonusAmount,
+                taxAmount: bonusTaxAmount,
+                isLast: false,
+                isBonus: true,
+                isBonusOnly: true
+            });
+        }
+        
+        // Sort payments by date
+        payments.sort((a, b) => a.date - b.date);
+        
+        return payments;
+    }
+
+    calculateFirstPaymentDate(startDate, settlement, freq, transferDate) {
+        if (settlement === 'monthly') {
+            return new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+        } else {
+            let currentMonth = transferDate.getMonth() + 1;
+            let currentYear = transferDate.getFullYear();
+            
+            let nextPaymentMonth;
+            if (settlement === 'quarterly') {
+                nextPaymentMonth = Math.ceil(currentMonth / 3) * 3;
+            } else if (settlement === 'semiannual') {
+                nextPaymentMonth = Math.ceil(currentMonth / 6) * 6;
+            } else if (settlement === 'annual') {
+                nextPaymentMonth = 12;
+            }
+
+            if (nextPaymentMonth <= currentMonth) {
+                currentYear++;
+                if (settlement === 'annual') nextPaymentMonth = 12;
+                else if (settlement === 'semiannual') nextPaymentMonth = 6;
+                else if (settlement === 'quarterly') nextPaymentMonth = 3;
+            }
+
+            let firstPaymentCalculatedDate = new Date(currentYear, nextPaymentMonth, 0);
+            while(firstPaymentCalculatedDate <= startDate) {
+                firstPaymentCalculatedDate.setMonth(firstPaymentCalculatedDate.getMonth() + freq);
+                firstPaymentCalculatedDate.setDate(0);
+            }
+            
+            return firstPaymentCalculatedDate;
+        }
+    }
+
+    displayResults(inputs, schedule) {
+        document.getElementById('startDate').textContent = Utils.formatDate(schedule.startDate);
+        document.getElementById('capitalAmount').textContent = Utils.formatCurrency(inputs.capital);
+        document.getElementById('contractPeriod').textContent = inputs.months + ' miesięcy';
+        document.getElementById('interestRateValue').textContent = parseFloat(inputs.interestRate).toFixed(2) + '%';
+        document.getElementById('settlementType').textContent = schedule.settlementText;
+        
+        // Calculate margins
+        const partnerMargin = schedule.totalPayments - inputs.capital;
+        const totalMarginPercent = (partnerMargin / inputs.capital) * 100;
+        
+        document.getElementById('totalPayments').textContent = Utils.formatCurrency(schedule.totalPayments);
+        document.getElementById('partnerMargin').textContent = Utils.formatCurrency(partnerMargin);
+        document.getElementById('totalMarginPercent').textContent = totalMarginPercent.toFixed(4) + '%';
+    }
+
+    generateScheduleTable(schedule) {
+        const scheduleBody = document.getElementById('scheduleBody');
+        if (!scheduleBody) {
+            console.error('Element scheduleBody is null');
+            alert('Błąd: Kontener harmonogramu nie został znaleziony. Odśwież stronę.');
+            return;
+        }
+
+        scheduleBody.innerHTML = '';
+        let paymentIndex = 1;
+
+        schedule.payments.forEach((payment, index) => {
+            const row = document.createElement('tr');
+            const currentPaymentAmountBrutto = payment.amountNetto * CONFIG.VAT_RATE;
+
+            let displayPaymentNumber;
+            if (payment.isBonusOnly) {
+                displayPaymentNumber = '🎁 Bonus';
+            } else if (payment.isBonus && !payment.isBonusOnly) {
+                displayPaymentNumber = `🎁 ${paymentIndex}`;
+            } else {
+                displayPaymentNumber = paymentIndex;
+            }
+
+            if (!payment.isBonusOnly) {
+                paymentIndex++;
+            }
+
+            // Get bonus amount from CONFIG calculation
+            const bonusAmount = payment.amountNetto > 0 ? payment.amountNetto * CONFIG.BONUS.RATE : 0;
+            
+            row.innerHTML = `
+                <td>${displayPaymentNumber}</td>
+                <td>${Utils.formatDate(payment.date)}</td>
+                <td>${Utils.formatCurrency(payment.amountNetto)}${payment.isBonus && !payment.isBonusOnly ? ' (w tym bonus ' + Utils.formatCurrency(bonusAmount) + ')' : payment.isBonusOnly ? ' (bonus)' : ''}</td>
+                <td>${Utils.formatCurrency(payment.taxAmount)}</td>
+                <td>${Utils.formatCurrency(currentPaymentAmountBrutto)}</td>
+            `;
+            
+            if(payment.isBonus) {
+                row.classList.add('bonus-month');
+            }
+
+            scheduleBody.appendChild(row);
+        });
+    }
+
+    showResults() {
+        if (this.elements.resultsDiv) {
+            this.elements.resultsDiv.classList.remove('hidden');
+        }
+        
+        if (this.elements.toggleScheduleBtn) {
+            this.elements.toggleScheduleBtn.classList.remove('open');
+            this.elements.toggleScheduleBtn.textContent = 'Pokaż harmonogram wypłat';
+        }
+        
+        if (this.elements.scheduleContainer) {
+            this.elements.scheduleContainer.classList.remove('open');
+        }
+    }
+
+    generatePDF() {
+        PDFGenerator.generate(this.elements.companyNameInput.value.trim());
+    }
+
+    exportToCSV() {
+        CSVExporter.export();
+    }
+
+    initializeInternalParamsToggle() {
+        const toggleInternalParamsButton = document.getElementById('toggleInternalParams');
+        const internalParamsSection = document.getElementById('internalParams');
+        
+        if (toggleInternalParamsButton && internalParamsSection) {
+            toggleInternalParamsButton.addEventListener('click', function() {
+                internalParamsSection.classList.toggle('open');
+                toggleInternalParamsButton.classList.toggle('open');
+                
+                if (internalParamsSection.classList.contains('open')) {
+                    toggleInternalParamsButton.textContent = 'Ukryj parametry wewnętrzne';
+                } else {
+                    toggleInternalParamsButton.textContent = 'Pokaż parametry wewnętrzne';
+                }
+            });
+        }
+    }
+
+    addCSVExportButton() {
+        const buttonRow = document.querySelector('.button-row-results');
+        if (buttonRow && !document.getElementById('exportCSV')) {
+            const csvButton = document.createElement('button');
+            csvButton.id = 'exportCSV';
+            csvButton.className = 'btn btn-secondary';
+            csvButton.textContent = 'Eksportuj do CSV';
+            csvButton.addEventListener('click', () => this.exportToCSV());
+            buttonRow.appendChild(csvButton);
+        }
+    }
+}
+
+// Initialize calculator when DOM is ready
+function initializeCalculator() {
+    return new Calculator();
+}
