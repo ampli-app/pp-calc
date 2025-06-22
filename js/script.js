@@ -95,6 +95,14 @@ function loadFormData() {
             const resultsDiv = document.getElementById('results');
             if (resultsDiv) {
                 resultsDiv.classList.remove('hidden');
+                const prevBtn = document.getElementById('prevBtn');
+                if (prevBtn) {
+                    prevBtn.style.display = 'none';
+                }
+                const formContainer = document.querySelector('.form-container');
+                if (formContainer) {
+                    formContainer.style.display = 'none';
+                }
             }
 
             const resultIds = [
@@ -173,15 +181,7 @@ function restoreStep(stepNumber) {
     console.log('Przywrócono krok:', stepNumber);
 }
 
-function updateButtonVisibility(stepNumber) {
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const calculateBtn = document.getElementById('calculate');
-    
-    if (prevBtn) prevBtn.style.display = stepNumber > 1 ? 'inline-block' : 'none';
-    if (nextBtn) nextBtn.style.display = stepNumber < 3 ? 'inline-block' : 'none';
-    if (calculateBtn) calculateBtn.style.display = stepNumber === 3 ? 'inline-block' : 'none';
-}
+
 
 function setupAutoSave() {
     // Add event listeners to all form fields
@@ -565,6 +565,28 @@ function generatePdfmakePDF() {
 }
 
 // Legacy CSV export function (to be moved to CSVExporter.js)
+function updateButtonVisibility(stepNumber) {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const calculateBtn = document.getElementById('calculate');
+    const resultsDiv = document.getElementById('results');
+    
+    // Check if results are visible
+    const resultsVisible = resultsDiv && !resultsDiv.classList.contains('hidden');
+    
+    // Don't show navigation buttons if results are visible
+    if (resultsVisible) {
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+        if (calculateBtn) calculateBtn.style.display = 'none';
+        return;
+    }
+    
+    if (prevBtn) prevBtn.style.display = stepNumber > 1 ? 'inline-block' : 'none';
+    if (nextBtn) nextBtn.style.display = stepNumber < 3 ? 'inline-block' : 'none';
+    if (calculateBtn) calculateBtn.style.display = stepNumber === 3 ? 'inline-block' : 'none';
+}
+
 function exportToCSV() {
     const scheduleBody = document.getElementById('scheduleBody');
     if (!scheduleBody) return;

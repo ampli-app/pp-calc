@@ -221,6 +221,11 @@ class Calculator {
     goToStep(stepNumber) {
         this.currentStep = stepNumber;
 
+        // Update button visibility
+        if (typeof updateButtonVisibility === 'function') {
+            updateButtonVisibility(stepNumber);
+        }
+
         this.elements.formSteps.forEach(step => {
             step.classList.toggle('active', parseInt(step.dataset.step) === this.currentStep);
         });
