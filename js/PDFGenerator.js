@@ -9,7 +9,7 @@ class PDFGenerator {
         }
 
         const tableRows = this.buildTableRows(scheduleBody);
-        const docDefinition = this.createDocDefinition(infoData, tableRows, scheduleBody);
+        const docDefinition = this.createDocDefinition(infoData, tableRows, scheduleBody, companyName);
         const filename = this.generateFilename(companyName);
 
         // Generate PDF using pdfmake
@@ -104,7 +104,7 @@ class PDFGenerator {
         return { text: text, style: style, alignment: alignment };
     }
 
-    static createDocDefinition(infoData, tableRows, scheduleBody) {
+    static createDocDefinition(infoData, tableRows, scheduleBody, companyName) {
         const totalPaymentsText = document.getElementById('totalPayments')?.textContent || '---';
 
         return {
@@ -124,9 +124,10 @@ class PDFGenerator {
             
             // Enhanced header and footer
             header: this.createHeader(),
+            footer: this.createFooter(),
             content: [
-                // Enhanced title section
-                this.createTitleSection(),
+                // Enhanced title section with company name
+                this.createTitleSection(companyName),
 
                 // Logo section
                 this.createLogoSection(),
@@ -181,11 +182,11 @@ class PDFGenerator {
                         }],
                         margin: [40, 0, 40, 8]
                     },
-                    // Footer content
+                    // Footer content with updated text
                     {
                         columns: [
-                            { text: 'Dokument wygenerowany automatycznie', style: 'footerText' },
-                            { text: new Date().toLocaleString('pl-PL'), style: 'footerText', alignment: 'right' }
+                            { text: 'Dokument ma charakter informacyjny', style: 'footerText' },
+                            { text: `Dokument wygenerowano ${new Date().toLocaleString('pl-PL')}`, style: 'footerText', alignment: 'right' }
                         ],
                         margin: [40, 0, 40, 0]
                     }
@@ -352,14 +353,24 @@ class PDFGenerator {
         };
     }
 
-    static createTitleSection() {
+    static createTitleSection(companyName = '') {
+        const titleStack = [
+            {
+                text: 'Harmonogram Wypłat Partnerów',
+                style: 'mainTitle'
+            }
+        ];
+
+        // Add company name subtitle if provided
+        if (companyName && companyName.trim()) {
+            titleStack.push({
+                text: `Przykładowa oferta dla ${companyName.trim()}`,
+                style: 'subtitle'
+            });
+        }
+
         return {
-            stack: [
-                {
-                    text: 'Harmonogram Wypłat Partnerów',
-                    style: 'mainTitle'
-                }
-            ],
+            stack: titleStack,
             margin: [0, 0, 0, 15]
         };
     }
@@ -373,6 +384,13 @@ class PDFGenerator {
                 color: '#1e40af',
                 alignment: 'center',
                 margin: [0, 0, 0, 10]
+            },
+            subtitle: {
+                fontSize: 16,
+                color: '#374151',
+                alignment: 'center',
+                margin: [0, 5, 0, 0],
+                italics: true
             },
             sectionTitle: {
                 fontSize: 14,
