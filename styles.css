@@ -1,49 +1,4 @@
 
-/* Reset i podstawowe style */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-body {
-    background: var(--background);
-    background-attachment: fixed;
-    color: var(--text-primary-dark);
-    line-height: 1.6;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-}
-
-/* Animated background particles */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-    animation: float 20s ease-in-out infinite;
-    pointer-events: none;
-    z-index: -1;
-}
-
-@keyframes float {
-    0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
-    33% { transform: translate(30px, -30px) rotate(120deg); }
-    66% { transform: translate(-20px, 20px) rotate(240deg); }
-}
-
 .container {
     width: 100%;
     max-width: 1000px;
@@ -86,39 +41,6 @@ body::before {
         rgba(255, 255, 255, 0.05) 100%);
     pointer-events: none;
     z-index: -1;
-}
-
-h1 {
-    background: var(--primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 40px;
-    text-align: center;
-    font-size: 36px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    position: relative;
-}
-
-h1::after {
-    content: '';
-    display: block;
-    width: 80px;
-    height: 4px;
-    background: var(--primary);
-    border-radius: 2px;
-    margin: 20px auto 0;
-}
-
-h2 {
-    background: var(--primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 30px;
 }
 
 /* Specjalne style dla karty logowania */
@@ -512,29 +434,6 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
     border: 1px solid rgba(245, 87, 108, 0.2);
 }
 
-.hidden {
-    display: none !important;
-}
-
-/* Premium loading state */
-.loading {
-    position: relative;
-    pointer-events: none;
-}
-
-.loading::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.5) 50%, transparent 100%);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-    border-radius: inherit;
-}
-
 /* Style dla przycisku obliczeń i parametrów wewnętrznych */
 .toggle-calculations,
 .toggle-internal-params {
@@ -622,19 +521,4 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
         padding: 16px 24px; 
     }
     table { font-size: 12px; }
-}
-
-/* Accessibility improvements */
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* Focus styles for accessibility */
-*:focus-visible {
-    outline: 2px solid var(--primary-solid);
-    outline-offset: 2px;
 }
