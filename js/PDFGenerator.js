@@ -1,4 +1,4 @@
-// PDF Generator Module
+// Enhanced PDF Generator Module
 class PDFGenerator {
     static generate(companyName = '') {
         const infoData = this.collectInfoData();
@@ -39,33 +39,39 @@ class PDFGenerator {
     static buildTableRows(scheduleBody) {
         const tableRows = [];
         
-        // Table headers
+        // Enhanced table headers with better styling
         tableRows.push([
-            { text: 'Nr raty', style: 'tableHeader' },
-            { text: 'Data', style: 'tableHeader' },
-            { text: 'Kwota netto (zł)', style: 'tableHeader' },
-            { text: 'Podatek (zł)', style: 'tableHeader' },
-            { text: 'Kwota brutto (zł)', style: 'tableHeader' }
+            { text: 'Nr raty', style: 'tableHeader', alignment: 'center' },
+            { text: 'Data', style: 'tableHeader', alignment: 'center' },
+            { text: 'Kwota netto', style: 'tableHeader', alignment: 'right' },
+            { text: 'Podatek', style: 'tableHeader', alignment: 'right' },
+            { text: 'Kwota brutto', style: 'tableHeader', alignment: 'right' }
         ]);
 
-        // Table data
+        // Table data with improved formatting
         Array.from(scheduleBody.children).forEach(row => {
             const cells = Array.from(row.children);
             const rowData = cells.map((cell, index) => {
                 let text = cell.textContent.trim();
                 let style = 'tableCell';
+                let alignment = 'left';
 
                 // Apply bonus style if row has bonus-month class
                 if (row.classList.contains('bonus-month')) {
                     style = 'bonusCell';
                 }
 
+                // Set alignment based on column type
+                if (index === 0) alignment = 'center'; // Nr raty
+                else if (index === 1) alignment = 'center'; // Data
+                else if (index >= 2) alignment = 'right'; // Amount columns
+
                 // Special formatting for amount column with bonus information
                 if (index === 2) {
-                    return this.formatAmountCell(text, style);
+                    return this.formatAmountCell(text, style, alignment);
                 }
                 
-                return { text: text, style: style };
+                return { text: text, style: style, alignment: alignment };
             });
             tableRows.push(rowData);
         });
@@ -73,94 +79,391 @@ class PDFGenerator {
         return tableRows;
     }
 
-    static formatAmountCell(text, style) {
+    static formatAmountCell(text, style, alignment) {
         if (text.includes('(w tym bonus')) {
             const parts = text.split('(w tym bonus');
             return { 
                 text: [
-                    parts[0].trim(), 
-                    { text: '\n(w tym bonus' + parts[1], fontSize: 7, color: '#0ea5e9' }
+                    { text: parts[0].trim(), fontSize: 9 }, 
+                    { text: '\n(w tym bonus' + parts[1], fontSize: 7, color: '#059669', italics: true }
                 ], 
-                style: style 
+                style: style,
+                alignment: alignment
             };
         } else if (text.includes('(bonus)')) {
             return { 
                 text: [
-                    text.replace('(bonus)', '').trim(), 
-                    { text: '\n(bonus)', fontSize: 7, color: '#0ea5e9' }
+                    { text: text.replace('(bonus)', '').trim(), fontSize: 9 }, 
+                    { text: '\n(bonus)', fontSize: 7, color: '#059669', italics: true }
                 ], 
-                style: style 
+                style: style,
+                alignment: alignment
             };
         }
         
-        return { text: text, style: style };
+        return { text: text, style: style, alignment: alignment };
     }
 
     static createDocDefinition(infoData, tableRows, scheduleBody) {
         const totalPaymentsText = document.getElementById('totalPayments')?.textContent || '---';
 
         return {
+            pageSize: 'A4',
+            pageOrientation: 'portrait',
+            pageMargins: [40, 80, 40, 60],
+            
+            // Font definitions - using safe built-in fonts
+            fonts: {
+                Roboto: {
+                    normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf',
+                    bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Medium.ttf',
+                    italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Italic.ttf',
+                    bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-MediumItalic.ttf'
+                }
+            },
+            
+            // Enhanced header and footer
+            header: this.createHeader(),
+            footer: this.createFooter(),
+            
             content: [
-                // Logo section - conditionally included
+                // Logo section
                 this.createLogoSection(),
                 
-                // Header
-                { 
-                    text: 'Harmonogram Wypłat Partnerów', 
-                    style: 'header', 
-                    alignment: 'center' 
-                },
+                // Enhanced title section
+                this.createTitleSection(),
                 
-                // Timestamp and info section
-                {
-                    columns: [
-                        { text: `Wygenerowano: ${this.getFormattedTimestamp()}`, style: 'subheader' },
-                        { text: 'Dokument informacyjny', style: 'subheader', alignment: 'right' }
-                    ],
-                    margin: [0, 2, 0, 20]
-                },
+                // Document info bar
+                this.createDocumentInfoBar(),
 
-                // Basic Info
-                { text: 'Podstawowe informacje - warunki współpracy', style: 'sectionHeader', margin: [0, 0, 0, 10] },
-                this.createInfoColumns(infoData),
+                // Basic Info with improved layout
+                this.createInfoSection(infoData),
 
-                // Payment table
-                this.createPaymentTable(tableRows, scheduleBody),
+                // Enhanced payment table
+                this.createEnhancedPaymentTable(tableRows, scheduleBody),
 
-                // Summary Section
-                {
-                    text: `Łącznie do wypłaty - kwota netto marża: ${totalPaymentsText}`,
-                    style: 'summary',
-                    alignment: 'right',
-                    margin: [0, 20, 0, 0]
-                },
+                // Summary section with better formatting
+                this.createSummarySection(totalPaymentsText),
 
-                // Footer
-                {
-                    text: 'Powyższy harmonogram ma charakter informacyjny i nie stanowi oferty w rozumieniu przepisów Kodeksu Cywilnego.',
-                    style: 'subheader',
-                    alignment: 'center',
-                    margin: [0, 40, 0, 0]
-                }
+                // Disclaimer with improved styling
+                this.createDisclaimer()
             ],
-            styles: this.getDocumentStyles(),
+            styles: this.getEnhancedDocumentStyles(),
             defaultStyle: {
-                font: 'Roboto'
+                font: 'Roboto',
+                fontSize: 10,
+                lineHeight: 1.2
             }
         };
     }
 
+    static createHeader() {
+        return function(currentPage, pageCount, pageSize) {
+            if (currentPage === 1) return null; // No header on first page
+            
+            return {
+                columns: [
+                    { text: 'Harmonogram Wypłat Partnerów', style: 'headerText' },
+                    { text: `Strona ${currentPage} z ${pageCount}`, style: 'headerText', alignment: 'right' }
+                ],
+                margin: [40, 20, 40, 0]
+            };
+        };
+    }
+
+    static createFooter() {
+        return function(currentPage, pageCount) {
+            return {
+                stack: [
+                    // Separator line
+                    {
+                        canvas: [{
+                            type: 'line',
+                            x1: 0, y1: 0,
+                            x2: 515, y2: 0,
+                            lineWidth: 0.5,
+                            lineColor: '#e2e8f0'
+                        }],
+                        margin: [40, 0, 40, 8]
+                    },
+                    // Footer content
+                    {
+                        columns: [
+                            { text: 'Dokument wygenerowany automatycznie', style: 'footerText' },
+                            { text: new Date().toLocaleDateString('pl-PL'), style: 'footerText', alignment: 'right' }
+                        ],
+                        margin: [40, 0, 40, 0]
+                    }
+                ]
+            };
+        };
+    }
+
     static createLogoSection() {
-        // Check if logo is available and valid
         if (CONFIG.COMPANY_LOGO_BASE64 && CONFIG.COMPANY_LOGO_BASE64 !== 'kod64') {
             return {
                 image: CONFIG.COMPANY_LOGO_BASE64,
-                width: 100,
+                width: 120,
                 alignment: 'center',
-                margin: [0, 0, 0, 20]
+                margin: [0, 0, 0, 30]
             };
         }
-        return null; // No logo to display
+        return { text: '', margin: [0, 0, 0, 20] }; // Spacer if no logo
+    }
+
+    static createTitleSection() {
+        return {
+            stack: [
+                { 
+                    text: 'Harmonogram Wypłat Partnerów', 
+                    style: 'mainTitle'
+                },
+                // Decorative line under title
+                {
+                    canvas: [{
+                        type: 'line',
+                        x1: 150, y1: 0,
+                        x2: 365, y2: 0,
+                        lineWidth: 2,
+                        lineColor: '#3b82f6'
+                    }],
+                    alignment: 'center',
+                    margin: [0, 5, 0, 0]
+                }
+            ],
+            margin: [0, 0, 0, 25]
+        };
+    }
+
+    static createDocumentInfoBar() {
+        return {
+            table: {
+                widths: ['*', '*'],
+                body: [[
+                    { text: `Wygenerowano: ${this.getFormattedTimestamp()}`, style: 'infoBarText' },
+                    { text: 'Dokument informacyjny', style: 'infoBarText', alignment: 'right' }
+                ]]
+            },
+            layout: 'noBorders',
+            fillColor: '#f8fafc',
+            margin: [0, 0, 0, 25]
+        };
+    }
+
+    static createInfoSection(infoData) {
+        return {
+            stack: [
+                { text: 'Podstawowe informacje', style: 'sectionTitle' },
+                {
+                    table: {
+                        widths: ['*', '*'],
+                        body: this.createInfoTableBody(infoData)
+                    },
+                    layout: {
+                        hLineWidth: () => 0,
+                        vLineWidth: () => 0,
+                        paddingLeft: () => 0,
+                        paddingRight: () => 0,
+                        paddingTop: () => 4,
+                        paddingBottom: () => 4
+                    },
+                    margin: [10, 0, 10, 0]
+                }
+            ],
+            margin: [0, 0, 0, 25]
+        };
+    }
+
+    static createInfoTableBody(infoData) {
+        const tableBody = [];
+        for (let i = 0; i < infoData.length; i += 2) {
+            const leftColumn = infoData[i];
+            const rightColumn = infoData[i + 1] || ['', ''];
+            
+            tableBody.push([
+                { 
+                    text: [
+                        { text: leftColumn[0], style: 'infoLabel' },
+                        { text: ` ${leftColumn[1]}`, style: 'infoValue' }
+                    ]
+                },
+                { 
+                    text: [
+                        { text: rightColumn[0], style: 'infoLabel' },
+                        { text: ` ${rightColumn[1]}`, style: 'infoValue' }
+                    ]
+                }
+            ]);
+        }
+        return tableBody;
+    }
+
+    static createEnhancedPaymentTable(tableRows, scheduleBody) {
+        return {
+            stack: [
+                { text: 'Harmonogram płatności', style: 'sectionTitle' },
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: [60, 80, '*', 80, '*'],
+                        body: tableRows
+                    },
+                    layout: {
+                        fillColor: (rowIndex, node, columnIndex) => {
+                            if (rowIndex === 0) return '#1e40af'; // Header
+                            
+                            const originalRow = scheduleBody.children[rowIndex - 1];
+                            if (originalRow && originalRow.classList.contains('bonus-month')) {
+                                return '#ecfdf5'; // Light green for bonus rows
+                            }
+                            
+                            return (rowIndex % 2 === 0) ? '#f8fafc' : '#ffffff';
+                        },
+                        hLineWidth: (i, node) => {
+                            if (i === 0 || i === 1) return 1;
+                            return 0.5;
+                        },
+                        vLineWidth: () => 0,
+                        hLineColor: () => '#e2e8f0',
+                        paddingLeft: () => 8,
+                        paddingRight: () => 8,
+                        paddingTop: () => 6,
+                        paddingBottom: () => 6
+                    }
+                }
+            ],
+            margin: [0, 0, 0, 20]
+        };
+    }
+
+    static createSummarySection(totalPaymentsText) {
+        return {
+            table: {
+                widths: ['*', 'auto'],
+                body: [[
+                    { text: 'Łączna kwota netto marży:', style: 'summaryLabel' },
+                    { text: totalPaymentsText, style: 'summaryValue' }
+                ]]
+            },
+            layout: {
+                fillColor: () => '#eff6ff',
+                hLineWidth: () => 1,
+                vLineWidth: () => 1,
+                hLineColor: () => '#3b82f6',
+                vLineColor: () => '#3b82f6',
+                paddingLeft: () => 15,
+                paddingRight: () => 15,
+                paddingTop: () => 10,
+                paddingBottom: () => 10
+            },
+            margin: [0, 0, 0, 30]
+        };
+    }
+
+    static createDisclaimer() {
+        return {
+            stack: [
+                {
+                    canvas: [{
+                        type: 'line',
+                        x1: 0, y1: 0,
+                        x2: 515, y2: 0,
+                        lineWidth: 0.5,
+                        lineColor: '#d1d5db'
+                    }],
+                    margin: [0, 0, 0, 10]
+                },
+                {
+                    text: 'Powyższy harmonogram ma charakter informacyjny i nie stanowi oferty w rozumieniu przepisów Kodeksu Cywilnego.',
+                    style: 'disclaimer'
+                }
+            ]
+        };
+    }
+
+    static getEnhancedDocumentStyles() {
+        return {
+            // Title styles
+            mainTitle: {
+                fontSize: 24,
+                bold: true,
+                color: '#1e40af',
+                alignment: 'center',
+                margin: [0, 0, 0, 10]
+            },
+            sectionTitle: {
+                fontSize: 14,
+                bold: true,
+                color: '#1f2937',
+                margin: [0, 0, 0, 10]
+            },
+            
+            // Header and footer
+            headerText: {
+                fontSize: 9,
+                color: '#6b7280'
+            },
+            footerText: {
+                fontSize: 8,
+                color: '#9ca3af'
+            },
+            
+            // Info section
+            infoBarText: {
+                fontSize: 9,
+                color: '#4b5563',
+                margin: [8, 8, 8, 8]
+            },
+            infoLabel: {
+                fontSize: 9,
+                bold: true,
+                color: '#374151'
+            },
+            infoValue: {
+                fontSize: 9,
+                color: '#1f2937'
+            },
+            
+            // Table styles
+            tableHeader: {
+                bold: true,
+                fontSize: 10,
+                color: '#ffffff',
+                alignment: 'center'
+            },
+            tableCell: {
+                fontSize: 9,
+                color: '#1f2937'
+            },
+            bonusCell: {
+                fontSize: 9,
+                color: '#059669',
+                bold: true
+            },
+            
+            // Summary styles
+            summaryLabel: {
+                fontSize: 12,
+                bold: true,
+                color: '#1e40af',
+                alignment: 'right'
+            },
+            summaryValue: {
+                fontSize: 14,
+                bold: true,
+                color: '#1e40af',
+                alignment: 'right'
+            },
+            
+            // Disclaimer
+            disclaimer: {
+                fontSize: 9,
+                color: '#6b7280',
+                alignment: 'center',
+                italics: true,
+                lineHeight: 1.3
+            }
+        };
     }
 
     static getFormattedTimestamp() {
@@ -171,109 +474,6 @@ class PDFGenerator {
             hour: '2-digit',
             minute: '2-digit'
         });
-    }
-
-    static createInfoColumns(infoData) {
-        return {
-            columns: [
-                {
-                    width: '50%',
-                    ul: infoData
-                        .filter((_, i) => i % 2 === 0)
-                        .map(item => ({ 
-                            text: [{ text: item[0], bold: true }, ` ${item[1]}`], 
-                            margin: [0, 2] 
-                        }))
-                },
-                {
-                    width: '50%',
-                    ul: infoData
-                        .filter((_, i) => i % 2 !== 0)
-                        .map(item => ({ 
-                            text: [{ text: item[0], bold: true }, ` ${item[1]}`], 
-                            margin: [0, 2] 
-                        }))
-                }
-            ],
-            columnGap: 20,
-            margin: [0, 0, 0, 20]
-        };
-    }
-
-    static createPaymentTable(tableRows, scheduleBody) {
-        return {
-            table: {
-                headerRows: 1,
-                widths: ['auto', 'auto', '*', 'auto', '*'],
-                body: tableRows
-            },
-            layout: {
-                fillColor: (rowIndex, node, columnIndex) => {
-                    if (rowIndex === 0) return '#F1F5F9'; // Header row
-                    
-                    const originalRow = scheduleBody.children[rowIndex - 1];
-                    if (originalRow && originalRow.classList.contains('bonus-month')) {
-                        return '#E0F2F7'; // Bonus row highlight
-                    }
-                    
-                    return (rowIndex % 2 === 0) ? '#FCFDFE' : null; // Alternating rows
-                },
-                hLineWidth: (i, node) => (i === 0 || i === node.table.body.length) ? 0 : 0.5,
-                vLineWidth: (i, node) => 0,
-                hLineColor: (i, node) => '#E2E8F0',
-                paddingLeft: (i, node) => 5,
-                paddingRight: (i, node) => 5,
-                paddingTop: (i, node) => 8,
-                paddingBottom: (i, node) => 8
-            }
-        };
-    }
-
-    static getDocumentStyles() {
-        return {
-            header: {
-                fontSize: 22,
-                bold: true,
-                color: '#090d2e',
-                margin: [0, 0, 0, 10]
-            },
-            subheader: {
-                fontSize: 10,
-                color: '#64748b'
-            },
-            sectionHeader: {
-                fontSize: 14,
-                bold: true,
-                color: '#090d2e'
-            },
-            summary: {
-                fontSize: 12,
-                bold: true,
-                color: '#090d2e',
-                margin: [0, 10, 0, 10]
-            },
-            tableHeader: {
-                bold: true,
-                fontSize: 9,
-                color: '#475569',
-                alignment: 'left',
-                fillColor: '#F1F5F9',
-                margin: [0, 0, 0, 0]
-            },
-            tableCell: {
-                fontSize: 8,
-                color: '#1e293b',
-                alignment: 'left',
-                margin: [0, 0, 0, 0]
-            },
-            bonusCell: {
-                fontSize: 8,
-                color: '#0ea5e9',
-                bold: true,
-                alignment: 'left',
-                margin: [0, 0, 0, 0]
-            }
-        };
     }
 
     static generateFilename(companyName) {
