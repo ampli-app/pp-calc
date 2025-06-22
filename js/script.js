@@ -8,16 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const passwordInput = document.getElementById('password');
     const loginError = document.getElementById('loginError');
 
-    // Hardcoded credentials
-    const CORRECT_USERNAME = 'PlentiPartners';
-    const CORRECT_PASSWORD = 'admin123';
-
     if (loginBtn) {
         loginBtn.addEventListener('click', function() {
             const username = usernameInput.value;
             const password = passwordInput.value;
 
-            if (username === CORRECT_USERNAME && password === CORRECT_PASSWORD) {
+            if (username === CONFIG.AUTH.USERNAME && password === CONFIG.AUTH.PASSWORD) {
                 loginContainer.classList.add('hidden');
                 calculatorContainer.classList.remove('hidden');
                 initializeCalculator(); // Initialize calculator after successful login
@@ -26,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
 
     function initializeCalculator() {
         const elements = {
@@ -850,8 +847,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const docDefinition = {
                 content: [
                     // Conditional logo display
-                    companyLogoBase64 && companyLogoBase64 !== 'miejsce na base' ? {
-                        image: companyLogoBase64,
+                    CONFIG.COMPANY_LOGO_BASE64 && CONFIG.COMPANY_LOGO_BASE64 !== 'kod64'
+                        image: CONFIG.COMPANY_LOGO_BASE64,
                         width: 100,
                         alignment: 'center',
                         margin: [0, 0, 0, 20]
