@@ -18,7 +18,6 @@ class PDFGenerator {
 
     static collectInfoData() {
         return [
-            ['Data startu:', document.getElementById('startDate')?.textContent || '---'],
             ['Kapitał własny:', document.getElementById('capitalAmount')?.textContent || '---'],
             ['Okres umowy:', document.getElementById('contractPeriod')?.textContent || '---'],
             ['Stopa procentowa:', document.getElementById('interestRateValue')?.textContent || '---'],
