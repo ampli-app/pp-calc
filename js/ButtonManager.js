@@ -420,7 +420,7 @@ class ButtonManager {
      */
     detectCurrentState() {
         // Detect current step
-        const activeStep = document.querySelector('.progress-step.active');
+        const activeStep = document.querySelector('.form-step.active');
         if (activeStep) {
             this.currentStep = parseInt(activeStep.getAttribute('data-step')) || 1;
         }
