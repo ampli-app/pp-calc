@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Harmonogramu Wypłat Partnerów</title>
+    <link rel="icon" type="image/x-icon" href="https://partners.plenti.app/wp-content/uploads/2023/05/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <h2>Kalkulator Wypłat Partnerów</h2>
+        <div class="form-group">
+            <label for="username">Login:</label>
+            <input type="text" id="username" placeholder="Wprowadź login">
+        </div>
+        <div class="form-group">
+            <label for="password">Hasło:</label>
+            <input type="password" id="password" placeholder="Wprowadź hasło">
+        </div>
+        <button id="loginBtn" class="btn">Zaloguj</button>
+        <p class="login-error" id="loginError">Nieprawidłowy login lub hasło.</p>
+
+        <img src="https://partners.plenti.app/wp-content/uploads/2023/05/logo-plenti-partners.svg" alt="Logo firmy" style="max-width: 120px; display: block; margin: 40px auto 0;">
+    </div>
+
+    <div class="container hidden" id="calculatorContainer">
+        <img src="https://partners.plenti.app/wp-content/uploads/2023/05/logo-plenti-partners.svg" alt="Logo firmy" style="max-width: 200px; display: block; margin: 0 auto 30px;">
+        <h1>Kalkulator Harmonogramu Wypłat Partnerów</h1>
+        
+        <div class="form">
+            <div class="form-group">
+                <label for="companyName">Nazwa przedsiębiorstwa:</label>
+                <input type="text" id="companyName" placeholder="Wprowadź nazwę firmy">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="taxForm">Forma opodatkowania:</label>
+                    <select id="taxForm">
+                        <option value="ryczalt">Ryczałt</option>
+                        <option value="liniowy">Liniowy</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="taxRate">Stawka podatku:</label>
+                    <select id="taxRate">
+                        <option value="8.5">8,5%</option>
+                        <option value="12.5">12,5%</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="transferDate">Data wpływu przelewu do Plenti:</label>
+                    <input type="date" id="transferDate" value="2025-05-31">
+                </div>
+                
+                <div class="form-group">
+                    <label for="capital">Kapitał własny (zł netto):</label>
+                    <div class="input-group">
+                        <input type="number" id="capital" min="0" step="1000" value="100000">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="months">Na ile miesięcy:</label>
+                    <select id="months">
+                        <option value="12">12 miesięcy</option>
+                        <option value="18">18 miesięcy</option>
+                        <option value="24">24 miesięcy</option>
+                        <option value="30">30 miesięcy</option>
+                        <option value="36" selected>36 miesięcy</option>
+                        <option value="48">48 miesięcy</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="settlement">Rozliczenie:</label>
+                    <select id="settlement">
+                        <option value="monthly">Miesięczne</option>
+                        <option value="quarterly">Kwartalne</option>
+                        <option value="semiannual">Półroczne</option>
+                        <option value="annual" selected>Roczne</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="interestRate">IRR (dla całości kapitału):</label>
+                    <input type="number" id="interestRate" min="0" max="100" step="0.01" value="15" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="finalPayment">Procent spłaty na koniec umowy (%):</label>
+                    <input type="number" id="finalPayment" min="0" max="100" step="1" value="60" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <button id="toggleInternalParams" class="toggle-internal-params">Pokaż parametry wewnętrzne</button>
+                </div>
+            </div>
+            
+            <div id="internalParams" class="internal-params hidden">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="baseInterestRate">Bazowa stopa (% rocznie):</label>
+                        <input type="number" id="baseInterestRate" min="0" max="100" step="0.01" value="12.5">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Stopa na podstawie warunków:</label>
+                <p id="displayedInterestRate">--%</p>
+            </div>
+            
+            <div class="button-row">
+                <button id="showCalculations" class="toggle-calculations">Pokaż obliczenia</button>
+                <button id="calculate" class="btn">Generuj harmonogram</button>
+            </div>
+            
+            <div id="calculationDetails" class="calculation-details">
+                <p><strong>Obliczenia stopy procentowej:</strong></p>
+                <p id="calculationStep">...</p>
+            </div>
+        </div>
+        
+        <div id="results" class="results hidden">
+            <h2>Podstawowe informacje - warunki współpracy</h2>
+            
+            <div class="results-info">
+                <div class="info-item">
+                    <h3>Data startu:</h3>
+                    <p id="startDate">--.--.----</p>
+                </div>
+                <div class="info-item">
+                    <h3>Kapitał własny:</h3>
+                    <p id="capitalAmount">-- zł</p>
+                </div>
+                <div class="info-item">
+                    <h3>Okres umowy:</h3>
+                    <p id="contractPeriod">-- miesięcy</p>
+                </div>
+                <div class="info-item">
+                    <h3>IRR:</h3>
+                    <p id="interestRateValue">--%</p>
+                </div>
+                <div class="info-item">
+                    <h3>Rozliczenie:</h3>
+                    <p id="settlementType">--</p>
+                </div>
+                <div class="info-item">
+                    <h3>Suma wypłat dla partnera:</h3>
+                    <p id="totalPayments">-- zł</p>
+                </div>
+                <div class="info-item">
+                    <h3>Marża Partnera:</h3>
+                    <p id="partnerMargin">-- zł</p>
+                </div>
+                <div class="info-item">
+                    <h3>Całościowa marża z wynajmu:</h3>
+                    <p id="totalMarginPercent">--%</p>
+                </div>
+            </div>
+            
+            <div class="button-row-results">
+                <button id="toggleSchedule" class="toggle-schedule">Pokaż harmonogram wypłat</button>
+                <button id="downloadPdf" class="btn btn-secondary">Pobierz harmonogram PDF</button>
+                <button id="exportCSV" class="btn btn-secondary">Eksportuj do CSV</button>
+            </div>
+            
+            <div id="scheduleContainer" class="schedule">
+                <table id="scheduleTable">
+                    <thead>
+                        <tr>
+                            <th>Nr raty</th>
+                            <th>Data</th>
+                            <th>Kwota netto (zł)</th>
+                            <th>Podatek (zł)</th>
+                            <th>Kwota brutto (zł)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
