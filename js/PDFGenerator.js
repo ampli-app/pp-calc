@@ -97,6 +97,8 @@ class PDFGenerator {
     }
 
     static createDocDefinition(infoData, tableRows, scheduleBody) {
+        const totalPaymentsText = document.getElementById('totalPayments')?.textContent || '---';
+
         return {
             content: [
                 // Logo section - conditionally included
@@ -109,31 +111,38 @@ class PDFGenerator {
                     alignment: 'center' 
                 },
                 
-                // Generation timestamp
+                // Timestamp and info section
                 {
-                    text: `Wygenerowano: ${this.getFormattedTimestamp()}`,
+                    columns: [
+                        { text: `Wygenerowano: ${this.getFormattedTimestamp()}`, style: 'subheader' },
+                        { text: 'Dokument informacyjny', style: 'subheader', alignment: 'right' }
+                    ],
+                    margin: [0, 2, 0, 20]
+                },
+
+                // Basic Info
+                { text: 'Podstawowe informacje - warunki współpracy', style: 'sectionHeader', margin: [0, 0, 0, 10] },
+                this.createInfoColumns(infoData),
+
+                // Payment table
+                this.createPaymentTable(tableRows, scheduleBody),
+
+                // Summary Section
+                {
+                    text: `Łącznie do wypłaty - kwota netto marża: ${totalPaymentsText}`,
+                    style: 'summary',
+                    alignment: 'right',
+                    margin: [0, 20, 0, 0]
+                },
+
+                // Footer
+                {
+                    text: 'Powyższy harmonogram ma charakter informacyjny i nie stanowi oferty w rozumieniu przepisów Kodeksu Cywilnego.',
                     style: 'subheader',
                     alignment: 'center',
-                    margin: [0, 0, 0, 20]
-                },
-                
-                // Cooperation conditions section
-                { 
-                    text: 'Warunki współpracy', 
-                    style: 'sectionHeader', 
-                    margin: [0, 10, 0, 10] 
-                },
-                this.createInfoColumns(infoData),
-                
-                // Payment schedule section
-                { 
-                    text: 'Harmonogram płatności', 
-                    style: 'sectionHeader', 
-                    margin: [0, 10, 0, 10] 
-                },
-                this.createPaymentTable(tableRows, scheduleBody)
-            ].filter(Boolean), // Remove null/undefined elements
-            
+                    margin: [0, 40, 0, 0]
+                }
+            ],
             styles: this.getDocumentStyles(),
             defaultStyle: {
                 font: 'Roboto'
@@ -236,6 +245,12 @@ class PDFGenerator {
                 fontSize: 14,
                 bold: true,
                 color: '#090d2e'
+            },
+            summary: {
+                fontSize: 12,
+                bold: true,
+                color: '#090d2e',
+                margin: [0, 10, 0, 10]
             },
             tableHeader: {
                 bold: true,
