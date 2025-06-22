@@ -82,6 +82,24 @@ class Calculator {
             });
         }
 
+        // Clear validation errors on input/change
+        const fieldsToClear = [
+            this.elements.companyNameInput,
+            this.elements.taxFormSelect,
+            this.elements.taxRateSelect,
+            this.elements.transferDate,
+            this.elements.capitalInput,
+            this.elements.monthsSelect,
+            this.elements.settlementSelect
+        ];
+
+        fieldsToClear.forEach(element => {
+            if (element) {
+                const eventType = (element.tagName.toLowerCase() === 'select' || element.type === 'date') ? 'change' : 'input';
+                element.addEventListener(eventType, () => this._clearError(element));
+            }
+        });
+
         // Interest rate calculation triggers
         ['baseInterestRate', 'months', 'capital', 'settlement', 'taxForm', 'taxRate'].forEach(id => {
             const element = document.getElementById(id);
@@ -135,6 +153,22 @@ class Calculator {
     handlePrev() {
         if (this.currentStep > 1) {
             this.goToStep(this.currentStep - 1);
+        }
+    }
+
+    _clearError(element) {
+        element.classList.remove('input-error');
+        const parent = element.parentElement;
+        let errorElement;
+
+        if (parent.classList.contains('input-group')) {
+            errorElement = parent.nextElementSibling;
+        } else {
+            errorElement = element.nextElementSibling;
+        }
+
+        if (errorElement && errorElement.classList.contains('error-message')) {
+            errorElement.remove();
         }
     }
 
