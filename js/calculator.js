@@ -71,6 +71,31 @@ class Calculator {
     }
 
     handleNext() {
+        if (this.currentStep === 1) {
+            const companyName = this.elements.companyNameInput.value.trim();
+            if (companyName === '') {
+                this.elements.companyNameInput.classList.add('input-error');
+                
+                // Remove existing error message to avoid duplicates
+                const existingError = this.elements.companyNameInput.parentElement.querySelector('.error-message');
+                if (existingError) {
+                    existingError.remove();
+                }
+
+                const errorElement = document.createElement('p');
+                errorElement.textContent = 'Pole Nazwa przedsiębiorstwa nie może być puste';
+                errorElement.className = 'error-message';
+                this.elements.companyNameInput.after(errorElement);
+                return;
+            } else {
+                this.elements.companyNameInput.classList.remove('input-error');
+                const existingError = this.elements.companyNameInput.parentElement.querySelector('.error-message');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+        }
+
         if (this.currentStep < this.elements.formSteps.length) {
             this.goToStep(this.currentStep + 1);
         }
