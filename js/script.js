@@ -23,26 +23,51 @@ const AUTOSAVE_CONFIG = {
 // Auto-save functions
 function saveFormData() {
     const formData = {};
-    
+
     AUTOSAVE_CONFIG.fieldsToSave.forEach(fieldId => {
         const element = document.getElementById(fieldId);
         if (element) {
             formData[fieldId] = element.value;
         }
     });
-    
+
     // Save current step
     const activeStep = document.querySelector('.progress-step.active');
     if (activeStep) {
         formData.currentStep = activeStep.getAttribute('data-step');
     }
-    
-    // Save if results are visible
+
+    // Save results and schedule
     const resultsDiv = document.getElementById('results');
     if (resultsDiv && !resultsDiv.classList.contains('hidden')) {
         formData.resultsVisible = true;
+        formData.resultsData = {};
+        const resultIds = [
+            'transferDateDisplay', 'capitalAmount', 'contractPeriod',
+            'interestRateValue', 'settlementType', 'totalPayments',
+            'partnerMargin', 'totalMarginPercent'
+        ];
+        resultIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                formData.resultsData[id] = el.innerHTML;
+            }
+        });
+
+        const scheduleBody = document.getElementById('scheduleBody');
+        if (scheduleBody) {
+            formData.scheduleHtml = scheduleBody.innerHTML;
+        }
+
+        const scheduleContainer = document.getElementById('scheduleContainer');
+        if (scheduleContainer) {
+            formData.scheduleVisible = scheduleContainer.classList.contains('visible');
+        }
+
+    } else {
+        formData.resultsVisible = false;
     }
-    
+
     localStorage.setItem(AUTOSAVE_CONFIG.storageKey, JSON.stringify(formData));
     console.log('Dane zapisane automatycznie');
 }
@@ -50,38 +75,76 @@ function saveFormData() {
 function loadFormData() {
     const savedData = localStorage.getItem(AUTOSAVE_CONFIG.storageKey);
     if (!savedData) return;
-    
+
     try {
         const formData = JSON.parse(savedData);
-        
+
         // Restore form fields
         AUTOSAVE_CONFIG.fieldsToSave.forEach(fieldId => {
             const element = document.getElementById(fieldId);
             if (element && formData[fieldId]) {
                 element.value = formData[fieldId];
-                
-                // Trigger change event for dependent fields
                 if (fieldId === 'taxForm') {
                     element.dispatchEvent(new Event('change'));
                 }
             }
         });
-        
+
+        // Restore results if they were visible
+        if (formData.resultsVisible && formData.resultsData) {
+            const resultsDiv = document.getElementById('results');
+            if (resultsDiv) {
+                resultsDiv.classList.remove('hidden');
+            }
+
+            const resultIds = [
+                'transferDateDisplay', 'capitalAmount', 'contractPeriod',
+                'interestRateValue', 'settlementType', 'totalPayments',
+                'partnerMargin', 'totalMarginPercent'
+            ];
+            resultIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && formData.resultsData[id]) {
+                    el.innerHTML = formData.resultsData[id];
+                }
+            });
+
+            if (formData.scheduleHtml) {
+                const scheduleBody = document.getElementById('scheduleBody');
+                if (scheduleBody) {
+                    scheduleBody.innerHTML = formData.scheduleHtml;
+                }
+            }
+
+            const toggleScheduleBtn = document.getElementById('toggleSchedule');
+            if (toggleScheduleBtn) {
+                toggleScheduleBtn.addEventListener('click', function() {
+                    const scheduleContainer = document.getElementById('scheduleContainer');
+                    scheduleContainer.classList.toggle('visible');
+                    if (scheduleContainer.classList.contains('visible')) {
+                        toggleScheduleBtn.textContent = 'Ukryj harmonogram wypłat';
+                    } else {
+                        toggleScheduleBtn.textContent = 'Pokaż harmonogram wypłat';
+                    }
+                    saveFormData(); // Save state after toggling schedule
+                });
+            }
+
+            if (formData.scheduleVisible) {
+                const scheduleContainer = document.getElementById('scheduleContainer');
+                if (scheduleContainer) {
+                    scheduleContainer.classList.add('visible');
+                }
+                const toggleBtn = document.getElementById('toggleSchedule');
+                if (toggleBtn) toggleBtn.textContent = 'Ukryj harmonogram wypłat';
+            }
+        }
+
         // Restore current step if saved
         if (formData.currentStep) {
             restoreStep(formData.currentStep);
         }
-        
-        // Check if results were previously shown
-        if (formData.resultsVisible) {
-            setTimeout(() => {
-                const resultsDiv = document.getElementById('results');
-                if (resultsDiv) {
-                    resultsDiv.classList.remove('hidden');
-                }
-            }, 200);
-        }
-        
+
         console.log('Dane przywrócone z localStorage');
     } catch (error) {
         console.error('Błąd podczas przywracania danych:', error);
