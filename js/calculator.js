@@ -5,8 +5,7 @@ class Calculator {
         this.currentStep = 1;
         this.initializeElements();
         this.bindEvents();
-        this.goToStep(1); 
-        this.calculateInterestRate();
+        this.goToStep(1);
     }
 
     initializeElements() {
@@ -448,6 +447,7 @@ class Calculator {
     }
 
     calculateInterestRate() {
+        console.log('calculateInterestRate called!', new Error().stack);
         const inputs = this.getCalculationInputs();
         if (!inputs.isValid) return 0;
 
