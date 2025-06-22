@@ -3,6 +3,243 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
+// Auto-save configuration
+const AUTOSAVE_CONFIG = {
+    storageKey: 'plenti_calculator_data',
+    fieldsToSave: [
+        'companyName',
+        'taxForm',
+        'taxRate',
+        'transferDate',
+        'capital',
+        'months',
+        'settlement',
+        'baseInterestRate',
+        'interestRate',
+        'finalPayment'
+    ]
+};
+
+// Auto-save functions
+function saveFormData() {
+    const formData = {};
+    
+    AUTOSAVE_CONFIG.fieldsToSave.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) {
+            formData[fieldId] = element.value;
+        }
+    });
+    
+    // Save current step
+    const activeStep = document.querySelector('.progress-step.active');
+    if (activeStep) {
+        formData.currentStep = activeStep.getAttribute('data-step');
+    }
+    
+    // Save if results are visible
+    const resultsDiv = document.getElementById('results');
+    if (resultsDiv && !resultsDiv.classList.contains('hidden')) {
+        formData.resultsVisible = true;
+    }
+    
+    localStorage.setItem(AUTOSAVE_CONFIG.storageKey, JSON.stringify(formData));
+    console.log('Dane zapisane automatycznie');
+}
+
+function loadFormData() {
+    const savedData = localStorage.getItem(AUTOSAVE_CONFIG.storageKey);
+    if (!savedData) return;
+    
+    try {
+        const formData = JSON.parse(savedData);
+        
+        // Restore form fields
+        AUTOSAVE_CONFIG.fieldsToSave.forEach(fieldId => {
+            const element = document.getElementById(fieldId);
+            if (element && formData[fieldId]) {
+                element.value = formData[fieldId];
+                
+                // Trigger change event for dependent fields
+                if (fieldId === 'taxForm') {
+                    element.dispatchEvent(new Event('change'));
+                }
+            }
+        });
+        
+        // Restore current step if saved
+        if (formData.currentStep) {
+            restoreStep(formData.currentStep);
+        }
+        
+        // Check if results were previously shown
+        if (formData.resultsVisible) {
+            setTimeout(() => {
+                const resultsDiv = document.getElementById('results');
+                if (resultsDiv) {
+                    resultsDiv.classList.remove('hidden');
+                }
+            }, 200);
+        }
+        
+        console.log('Dane przywrócone z localStorage');
+    } catch (error) {
+        console.error('Błąd podczas przywracania danych:', error);
+    }
+}
+
+function restoreStep(stepNumber) {
+    // Remove active class from all steps and form sections
+    document.querySelectorAll('.progress-step').forEach(step => {
+        step.classList.remove('active');
+    });
+    document.querySelectorAll('.form-step').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Add active class to correct step and form section
+    const targetStep = document.querySelector(`.progress-step[data-step="${stepNumber}"]`);
+    const targetSection = document.querySelector(`.form-step[data-step="${stepNumber}"]`);
+    
+    if (targetStep) targetStep.classList.add('active');
+    if (targetSection) targetSection.classList.add('active');
+    
+    // Update button visibility based on step
+    updateButtonVisibility(stepNumber);
+    
+    console.log('Przywrócono krok:', stepNumber);
+}
+
+function updateButtonVisibility(stepNumber) {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const calculateBtn = document.getElementById('calculate');
+    
+    if (prevBtn) prevBtn.style.display = stepNumber > 1 ? 'inline-block' : 'none';
+    if (nextBtn) nextBtn.style.display = stepNumber < 3 ? 'inline-block' : 'none';
+    if (calculateBtn) calculateBtn.style.display = stepNumber === 3 ? 'inline-block' : 'none';
+}
+
+function setupAutoSave() {
+    // Add event listeners to all form fields
+    AUTOSAVE_CONFIG.fieldsToSave.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) {
+            // Save on input change
+            element.addEventListener('input', saveFormData);
+            element.addEventListener('change', saveFormData);
+        }
+    });
+    
+    // Save step changes
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && 
+                mutation.attributeName === 'class' &&
+                (mutation.target.classList.contains('progress-step') || 
+                 mutation.target.classList.contains('form-step'))) {
+                saveFormData();
+            }
+        });
+    });
+    
+    // Observe progress steps and form steps for changes
+    document.querySelectorAll('.progress-step, .form-step').forEach(element => {
+        observer.observe(element, { attributes: true });
+    });
+    
+    // Also observe results div to save when it becomes visible
+    const resultsDiv = document.getElementById('results');
+    if (resultsDiv) {
+        observer.observe(resultsDiv, { attributes: true });
+    }
+    
+    // Save when navigation buttons are clicked
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'nextBtn' || e.target.id === 'prevBtn' || e.target.id === 'calculate') {
+            setTimeout(saveFormData, 100); // Small delay to ensure DOM updates
+        }
+    });
+    
+    console.log('Auto-save skonfigurowany');
+}
+
+function clearSavedData() {
+    localStorage.removeItem(AUTOSAVE_CONFIG.storageKey);
+    console.log('Zapisane dane zostały wyczyszczone');
+}
+
+// Add logout functionality
+function logout() {
+    // Clear session
+    sessionStorage.removeItem('isLoggedIn');
+    // Clear saved form data
+    clearSavedData();
+    // Reload page to show login screen
+    location.reload();
+}
+
+// Add logout and clear data buttons
+function addActionButtons() {
+    const buttonRow = document.querySelector('.button-row-results');
+    if (buttonRow && !document.getElementById('logoutBtn')) {
+        // Logout button
+        const logoutBtn = document.createElement('button');
+        logoutBtn.id = 'logoutBtn';
+        logoutBtn.className = 'btn btn-secondary';
+        logoutBtn.textContent = 'Wyloguj';
+        logoutBtn.style.marginLeft = '10px';
+        
+        logoutBtn.addEventListener('click', function() {
+            if (confirm('Czy na pewno chcesz się wylogować? Wszystkie dane zostaną utracone.')) {
+                logout();
+            }
+        });
+        
+        // Clear data button
+        const clearBtn = document.createElement('button');
+        clearBtn.id = 'clearDataBtn';
+        clearBtn.className = 'btn btn-secondary';
+        clearBtn.textContent = 'Wyczyść dane';
+        clearBtn.style.marginLeft = '10px';
+        
+        clearBtn.addEventListener('click', function() {
+            if (confirm('Czy na pewno chcesz wyczyścić wszystkie dane?')) {
+                clearSavedData();
+                location.reload(); // Reload page to reset form
+            }
+        });
+        
+        buttonRow.appendChild(logoutBtn);
+        buttonRow.appendChild(clearBtn);
+    }
+}
+
+// Also add logout button to the header area
+function addHeaderLogoutButton() {
+    const container = document.getElementById('calculatorContainer');
+    if (container && !document.getElementById('headerLogoutBtn')) {
+        const header = container.querySelector('h1');
+        if (header) {
+            const logoutBtn = document.createElement('button');
+            logoutBtn.id = 'headerLogoutBtn';
+            logoutBtn.className = 'btn btn-secondary';
+            logoutBtn.textContent = 'Wyloguj';
+            logoutBtn.style.cssText = 'position: absolute; top: 20px; right: 20px; padding: 8px 16px; font-size: 14px;';
+            
+            logoutBtn.addEventListener('click', function() {
+                if (confirm('Czy na pewno chcesz się wylogować? Wszystkie dane zostaną utracone.')) {
+                    logout();
+                }
+            });
+            
+            // Make container relative for absolute positioning
+            container.style.position = 'relative';
+            container.insertBefore(logoutBtn, header);
+        }
+    }
+}
+
 function initializeApp() {
     const loginContainer = document.getElementById('loginContainer');
     const calculatorContainer = document.getElementById('calculatorContainer');
@@ -15,8 +252,20 @@ function initializeApp() {
     if (sessionStorage.getItem('isLoggedIn') === 'true') {
         loginContainer.classList.add('hidden');
         calculatorContainer.classList.remove('hidden');
+        
+        // Load saved data after showing calculator
+        setTimeout(() => {
+            loadFormData();
+            setupAutoSave();
+            addHeaderLogoutButton(); // Add logout button to header
+        }, 100);
+        
         const calculator = initializeCalculator();
         calculator.addCSVExportButton();
+        
+        // Add action buttons to results
+        setTimeout(addActionButtons, 500);
+        
         console.log('Calculator initialized from session.');
         return; // Skip login logic
     }
@@ -28,8 +277,20 @@ function initializeApp() {
             sessionStorage.setItem('isLoggedIn', 'true'); // Set session for bypass
             loginContainer.classList.add('hidden');
             calculatorContainer.classList.remove('hidden');
+            
+            // Load saved data after successful login
+            setTimeout(() => {
+                loadFormData();
+                setupAutoSave();
+                addHeaderLogoutButton(); // Add logout button to header
+            }, 100);
+            
             const calculator = initializeCalculator();
             calculator.addCSVExportButton();
+            
+            // Add action buttons to results
+            setTimeout(addActionButtons, 500);
+            
             console.log('Calculator initialized successfully (login bypassed)');
             // --- END TESTING ---
 
@@ -43,11 +304,21 @@ function initializeApp() {
                 loginContainer.classList.add('hidden');
                 calculatorContainer.classList.remove('hidden');
                 
+                // Load saved data after successful login
+                setTimeout(() => {
+                    loadFormData();
+                    setupAutoSave();
+                    addHeaderLogoutButton(); // Add logout button to header
+                }, 100);
+                
                 // Initialize calculator after successful login
                 const calculator = initializeCalculator();
                 
                 // Add CSV export button
                 calculator.addCSVExportButton();
+                
+                // Add action buttons to results
+                setTimeout(addActionButtons, 500);
                 
                 console.log('Calculator initialized successfully');
             } else {
