@@ -17,20 +17,27 @@ class Calculator {
             formSteps: document.querySelectorAll('.form-step'),
             progressSteps: document.querySelectorAll('.progress-step'),
 
-            // Original elements
+            // Form inputs
             companyNameInput: document.getElementById('companyName'),
             taxFormSelect: document.getElementById('taxForm'),
             taxRateSelect: document.getElementById('taxRate'),
             transferDate: document.getElementById('transferDate'),
+            capitalInput: document.getElementById('capital'),
+            monthsSelect: document.getElementById('months'),
+            settlementSelect: document.getElementById('settlement'),
+
+            // Action buttons
             calculateBtn: document.getElementById('calculate'),
             toggleScheduleBtn: document.getElementById('toggleSchedule'),
+            downloadPdfBtn: document.getElementById('downloadPdf'),
+            exportCSVBtn: document.getElementById('exportCSV'),
+
+            // Display elements
             scheduleContainer: document.getElementById('scheduleContainer'),
             resultsDiv: document.getElementById('results'),
             showCalculationsBtn: document.getElementById('showCalculations'),
             calculationDetails: document.getElementById('calculationDetails'),
             calculationStep: document.getElementById('calculationStep'),
-            downloadPdfBtn: document.getElementById('downloadPdf'),
-            exportCSVBtn: document.getElementById('exportCSV')
         };
 
         if (this.elements.transferDate) {
@@ -85,32 +92,42 @@ class Calculator {
     }
 
     handleNext() {
-        if (this.currentStep === 1) {
-            const companyName = this.elements.companyNameInput.value.trim();
-            if (companyName === '') {
-                this.elements.companyNameInput.classList.add('input-error');
-                
-                // Remove existing error message to avoid duplicates
-                const existingError = this.elements.companyNameInput.parentElement.querySelector('.error-message');
-                if (existingError) {
-                    existingError.remove();
-                }
+        let isStepValid = true;
 
-                const errorElement = document.createElement('p');
-                errorElement.textContent = 'Pole Nazwa przedsiębiorstwa nie może być puste';
-                errorElement.className = 'error-message';
-                this.elements.companyNameInput.after(errorElement);
-                return;
-            } else {
-                this.elements.companyNameInput.classList.remove('input-error');
-                const existingError = this.elements.companyNameInput.parentElement.querySelector('.error-message');
-                if (existingError) {
-                    existingError.remove();
+        // Clear previous errors for the current step before re-validating
+        this.elements.formSteps[this.currentStep - 1].querySelectorAll('.input-error').forEach(el => {
+            el.classList.remove('input-error');
+        });
+        this.elements.formSteps[this.currentStep - 1].querySelectorAll('.error-message').forEach(el => {
+            el.remove();
+        });
+
+        if (this.currentStep === 1) {
+            const fieldsToValidate = [
+                { element: this.elements.companyNameInput, message: 'Pole Nazwa przedsiębiorstwa nie może być puste' },
+                { element: this.elements.taxFormSelect, message: 'Proszę wybrać formę opodatkowania' },
+                { element: this.elements.taxRateSelect, message: 'Proszę wybrać stawkę podatku' }
+            ];
+            fieldsToValidate.forEach(field => {
+                if (!this._validateField(field.element, field.message)) {
+                    isStepValid = false;
                 }
-            }
+            });
+        } else if (this.currentStep === 2) {
+            const fieldsToValidate = [
+                { element: this.elements.transferDate, message: 'Proszę wybrać datę' },
+                { element: this.elements.capitalInput, message: 'Proszę wprowadzić kapitał' },
+                { element: this.elements.monthsSelect, message: 'Proszę wybrać okres' },
+                { element: this.elements.settlementSelect, message: 'Proszę wybrać rodzaj rozliczenia' }
+            ];
+            fieldsToValidate.forEach(field => {
+                if (!this._validateField(field.element, field.message)) {
+                    isStepValid = false;
+                }
+            });
         }
 
-        if (this.currentStep < this.elements.formSteps.length) {
+        if (isStepValid && this.currentStep < this.elements.formSteps.length) {
             this.goToStep(this.currentStep + 1);
         }
     }
@@ -119,6 +136,25 @@ class Calculator {
         if (this.currentStep > 1) {
             this.goToStep(this.currentStep - 1);
         }
+    }
+
+    _validateField(element, errorMessage) {
+        const value = element.value.trim();
+        if (value === '') {
+            element.classList.add('input-error');
+            const errorElement = document.createElement('p');
+            errorElement.textContent = errorMessage;
+            errorElement.className = 'error-message';
+            // Insert after the element's parent if it's in an input-group, otherwise after the element
+            const parent = element.parentElement;
+            if (parent.classList.contains('input-group')) {
+                parent.after(errorElement);
+            } else {
+                element.after(errorElement);
+            }
+            return false;
+        } 
+        return true;
     }
 
     goToStep(stepNumber) {
