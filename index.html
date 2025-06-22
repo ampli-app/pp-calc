@@ -75,28 +75,30 @@
                     </div>
                     <div class="form-group">
                         <label for="capital">Kapitał własny (zł netto):</label>
-                        <input type="number" id="capital" min="0" step="1000" value="100000">
+                        <input type="number" id="capital" min="0" step="1000" placeholder="Wprowadź kwotę">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="months">Na ile miesięcy:</label>
                         <select id="months">
-                            <option value="12">12 miesięcy</option>
-                            <option value="18">18 miesięcy</option>
-                            <option value="24">24 miesięcy</option>
-                            <option value="30">30 miesięcy</option>
-                            <option value="36" selected>36 miesięcy</option>
-                            <option value="48">48 miesięcy</option>
+                            <option value="" disabled selected>Wybierz okres...</option>
+                            <option value="12">12</option>
+                            <option value="18">18</option>
+                            <option value="24">24</option>
+                            <option value="30">30</option>
+                            <option value="36">36</option>
+                            <option value="48">48</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="settlement">Rozliczenie:</label>
                         <select id="settlement">
+                            <option value="" disabled selected>Wybierz rozliczenie...</option>
                             <option value="monthly">Miesięczne</option>
                             <option value="quarterly">Kwartalne</option>
                             <option value="semiannual">Półroczne</option>
-                            <option value="annual" selected>Roczne</option>
+                            <option value="annual">Roczne</option>
                         </select>
                     </div>
                 </div>

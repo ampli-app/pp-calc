@@ -66,6 +66,15 @@ class Calculator {
             this.elements.exportCSVBtn.addEventListener('click', () => this.exportToCSV());
         }
 
+        // Prevent decimal numbers in capital input
+        const capitalInput = document.getElementById('capital');
+        if (capitalInput) {
+            capitalInput.addEventListener('input', (e) => {
+                // Replace any non-digit characters
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            });
+        }
+
         // Interest rate calculation triggers
         ['baseInterestRate', 'months', 'capital', 'settlement', 'taxForm', 'taxRate'].forEach(id => {
             const element = document.getElementById(id);
