@@ -318,6 +318,10 @@ class Calculator {
     }
 
     handleCalculate() {
+        const prevBtn = document.getElementById('prevBtn');
+        if (prevBtn) {
+            prevBtn.style.display = 'none';
+        }
         const inputs = this.getPaymentCalculationInputs();
         if (!inputs.isValid) return;
 
