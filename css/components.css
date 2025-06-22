@@ -348,6 +348,7 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
 .schedule.open {
     max-height: 3000px;
     opacity: 1;
+    margin-top: var(--spacing-lg);
 }
 
 .internal-params.open {
