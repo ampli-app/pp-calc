@@ -61,10 +61,15 @@ class PDFGenerator {
                     style = 'bonusCell';
                 }
 
-                // Set alignment based on column type
-                if (index === 0) alignment = 'center'; // Nr raty
-                else if (index === 1) alignment = 'center'; // Data
-                else if (index >= 2) alignment = 'right'; // Amount columns
+                // Set alignment based on column type & clean up text for column 0
+                if (index === 0) { // Nr raty
+                    text = text.replace('🎁', '').trim();
+                    alignment = 'center';
+                } else if (index === 1) { // Data
+                    alignment = 'center';
+                } else if (index >= 2) { // Amount columns
+                    alignment = 'right';
+                }
 
                 // Special formatting for amount column with bonus information
                 if (index === 2) {
@@ -93,8 +98,7 @@ class PDFGenerator {
         } else if (text.includes('(bonus)')) {
             return { 
                 text: [
-                    { text: text.replace('(bonus)', '').trim(), fontSize: 9 }, 
-                    { text: '\n(bonus)', fontSize: 7, color: '#059669', italics: true }
+                    { text: text.replace('(bonus)', '').trim(), fontSize: 9 }
                 ], 
                 style: style,
                 alignment: alignment
