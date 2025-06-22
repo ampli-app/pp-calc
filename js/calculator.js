@@ -265,16 +265,14 @@ class Calculator {
     }
 
     handleToggleSchedule() {
-        this.elements.toggleScheduleBtn.classList.toggle('open');
         if (this.elements.scheduleContainer) {
             this.elements.scheduleContainer.classList.toggle('open');
+            const isOpen = this.elements.scheduleContainer.classList.contains('open');
+            this.elements.toggleScheduleBtn.textContent = isOpen ? 'Ukryj harmonogram wypłat' : 'Pokaż harmonogram wypłat';
         } else {
             console.error('Element scheduleContainer is null');
             alert('Błąd: Kontener harmonogramu nie został znaleziony. Odśwież stronę.');
         }
-        
-        const isOpen = this.elements.toggleScheduleBtn.classList.contains('open');
-        this.elements.toggleScheduleBtn.textContent = isOpen ? 'Ukryj harmonogram wypłat' : 'Pokaż harmonogram wypłat';
     }
 
     handleShowCalculations() {
