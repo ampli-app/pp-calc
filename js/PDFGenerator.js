@@ -124,17 +124,12 @@ class PDFGenerator {
             
             // Enhanced header and footer
             header: this.createHeader(),
-            footer: this.createFooter(),
-            
             content: [
-                // Logo section
-                this.createLogoSection(),
-                
                 // Enhanced title section
                 this.createTitleSection(),
-                
-                // Document info bar
-                this.createDocumentInfoBar(),
+
+                // Logo section
+                this.createLogoSection(),
 
                 // Basic Info with improved layout
                 this.createInfoSection(infoData),
@@ -209,30 +204,6 @@ class PDFGenerator {
             };
         }
         return { text: '', margin: [0, 0, 0, 20] }; // Spacer if no logo
-    }
-
-    static createTitleSection() {
-        return {
-            stack: [
-                { 
-                    text: 'Harmonogram Wypłat Partnerów', 
-                    style: 'mainTitle'
-                },
-                // Decorative line under title
-                {
-                    canvas: [{
-                        type: 'line',
-                        x1: 150, y1: 0,
-                        x2: 365, y2: 0,
-                        lineWidth: 2,
-                        lineColor: '#3b82f6'
-                    }],
-                    alignment: 'center',
-                    margin: [0, 5, 0, 0]
-                }
-            ],
-            margin: [0, 0, 0, 25]
-        };
     }
 
     static createDocumentInfoBar() {
@@ -378,6 +349,18 @@ class PDFGenerator {
                     style: 'disclaimer'
                 }
             ]
+        };
+    }
+
+    static createTitleSection() {
+        return {
+            stack: [
+                {
+                    text: 'Harmonogram Wypłat Partnerów',
+                    style: 'mainTitle'
+                }
+            ],
+            margin: [0, 0, 0, 15]
         };
     }
 
