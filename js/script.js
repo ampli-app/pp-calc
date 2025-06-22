@@ -53,17 +53,18 @@ function onLoginSuccess() {
 
     // Load saved data after showing calculator
     setTimeout(() => {
-        loadFormData(); // TODO: Move to AutoSave module
-        setupAutoSave(); // TODO: Move to AutoSave module
-        addHeaderLogoutButton(); // Keep for now, will move to HeaderManager
-
-        // Initialize ButtonManager after DOM is ready
+        // Initialize ButtonManager BEFORE loading data
         buttonManager.initialize({
             autoSave: { saveFormData }, // Pass legacy function for now
             calculator: { calculate: () => calculator.handleCalculate() }, // Pass calculator method
             pdfGenerator: { generate: generatePdfmakePDF }, // Pass global function
             csvExporter: { export: exportToCSV } // Pass global function
         });
+        
+        // NOW load saved data - after ButtonManager is ready
+        loadFormData(); // TODO: Move to AutoSave module
+        setupAutoSave(); // TODO: Move to AutoSave module
+        addHeaderLogoutButton(); // Keep for now, will move to HeaderManager
     }, 100);
 
     calculator.addCSVExportButton();
