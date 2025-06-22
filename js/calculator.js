@@ -603,7 +603,7 @@ class Calculator {
     }
 
     displayResults(inputs, schedule) {
-        document.getElementById('startDate').textContent = Utils.formatDate(schedule.startDate);
+        document.getElementById('transferDateDisplay').textContent = Utils.formatDate(inputs.transferDate);
         document.getElementById('capitalAmount').textContent = Utils.formatCurrency(inputs.capital);
         document.getElementById('contractPeriod').textContent = inputs.months + ' miesięcy';
         document.getElementById('interestRateValue').textContent = parseFloat(inputs.interestRate).toFixed(2) + '%';
@@ -654,7 +654,7 @@ class Calculator {
             row.innerHTML = `
                 <td>${displayPaymentNumber}</td>
                 <td>${Utils.formatDate(payment.date)}</td>
-                <td>${Utils.formatCurrency(payment.amountNetto)}${payment.isBonus && !payment.isBonusOnly ? ' (w tym bonus ' + Utils.formatCurrency(bonusAmount) + ')' : payment.isBonusOnly ? ' (bonus)' : ''}</td>
+                <td>${Utils.formatCurrency(payment.amountNetto)}${payment.isBonus && !payment.isBonusOnly ? ' (bonus ' + Utils.formatCurrency(bonusAmount) + ')' : payment.isBonusOnly ? ' (bonus)' : ''}</td>
                 <td>${Utils.formatCurrency(payment.taxAmount)}</td>
                 <td>${Utils.formatCurrency(currentPaymentAmountBrutto)}</td>
             `;
