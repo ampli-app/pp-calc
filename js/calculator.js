@@ -174,12 +174,19 @@ class Calculator {
 
     _validateField(element, errorMessage) {
         const value = element.value.trim();
+        let error = null;
+
         if (value === '') {
+            error = errorMessage;
+        } else if (element.id === 'capital' && parseInt(value, 10) <= 0) {
+            error = 'Kapitał własny musi być liczbą większą od zera.';
+        }
+
+        if (error) {
             element.classList.add('input-error');
             const errorElement = document.createElement('p');
-            errorElement.textContent = errorMessage;
+            errorElement.textContent = error;
             errorElement.className = 'error-message';
-            // Insert after the element's parent if it's in an input-group, otherwise after the element
             const parent = element.parentElement;
             if (parent.classList.contains('input-group')) {
                 parent.after(errorElement);
@@ -187,7 +194,7 @@ class Calculator {
                 element.after(errorElement);
             }
             return false;
-        } 
+        }
         return true;
     }
 
