@@ -425,17 +425,22 @@ class Calculator {
             } else if (settlement === 'semiannual') {
                 nextPaymentMonth = Math.ceil(currentMonth / 6) * 6;
             } else if (settlement === 'annual') {
-                nextPaymentMonth = 12;
+                // Dla rozliczeń rocznych - pierwsza wypłata dokładnie rok po transferze
+                nextPaymentMonth = currentMonth;
+                currentYear++; // Przesuwamy na następny rok
             }
-
-            if (nextPaymentMonth <= currentMonth) {
+    
+            // Dla rozliczeń innych niż roczne - sprawdzamy czy nie minął już termin
+            if (settlement !== 'annual' && nextPaymentMonth <= currentMonth) {
                 currentYear++;
-                if (settlement === 'annual') nextPaymentMonth = 12;
-                else if (settlement === 'semiannual') nextPaymentMonth = 6;
+                if (settlement === 'semiannual') nextPaymentMonth = 6;
                 else if (settlement === 'quarterly') nextPaymentMonth = 3;
             }
-
+    
+            // Tworzymy datę wypłaty (ostatni dzień miesiąca)
             let firstPaymentCalculatedDate = new Date(currentYear, nextPaymentMonth, 0);
+            
+            // Upewniamy się, że data wypłaty jest po startDate
             while(firstPaymentCalculatedDate <= startDate) {
                 firstPaymentCalculatedDate.setMonth(firstPaymentCalculatedDate.getMonth() + freq);
                 firstPaymentCalculatedDate.setDate(0);
@@ -458,7 +463,7 @@ class Calculator {
         
         document.getElementById('totalPayments').textContent = Utils.formatCurrency(schedule.totalPayments);
         document.getElementById('partnerMargin').textContent = Utils.formatCurrency(partnerMargin);
-        document.getElementById('totalMarginPercent').textContent = totalMarginPercent.toFixed(4) + '%';
+        document.getElementById('totalMarginPercent').textContent = totalMarginPercent.toFixed(2) + '%';
     }
 
     generateScheduleTable(schedule) {
