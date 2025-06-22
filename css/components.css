@@ -406,3 +406,32 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
     -webkit-text-fill-color: unset;
     background-clip: unset;
 }
+
+/* Logout Icon Button */
+.logout-icon-btn {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+    z-index: 100;
+}
+
+.logout-icon-btn svg {
+    width: 24px;
+    height: 24px;
+    stroke: var(--text-secondary);
+    transition: stroke 0.3s ease;
+}
+
+.logout-icon-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.logout-icon-btn:hover svg {
+    stroke: var(--primary-solid);
+}

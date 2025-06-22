@@ -141,6 +141,11 @@
 }
 
 @media (max-width: 480px) {
+    .logout-icon-btn {
+        top: 20px;
+        right: 20px;
+    }
+
     .container, 
     .login-container {
         margin: 0;

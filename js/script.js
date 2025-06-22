@@ -181,27 +181,13 @@ function logout() {
 
 // Add logout and clear data buttons
 function addActionButtons() {
-    const buttonRow = document.querySelector('.button-row-results');
-    if (buttonRow && !document.getElementById('logoutBtn')) {
-        // Logout button
-        const logoutBtn = document.createElement('button');
-        logoutBtn.id = 'logoutBtn';
-        logoutBtn.className = 'btn btn-secondary';
-        logoutBtn.textContent = 'Wyloguj';
-        logoutBtn.style.marginLeft = '10px';
-        
-        logoutBtn.addEventListener('click', function() {
-            if (confirm('Czy na pewno chcesz się wylogować? Wszystkie dane zostaną utracone.')) {
-                logout();
-            }
-        });
-        
+    const buttonRow = document.querySelector('.button-row-results:last-of-type');
+    if (buttonRow && !document.getElementById('clearDataBtn')) {
         // Clear data button
         const clearBtn = document.createElement('button');
         clearBtn.id = 'clearDataBtn';
         clearBtn.className = 'btn btn-secondary';
         clearBtn.textContent = 'Wyczyść dane';
-        clearBtn.style.marginLeft = '10px';
         
         clearBtn.addEventListener('click', function() {
             if (confirm('Czy na pewno chcesz wyczyścić wszystkie dane?')) {
@@ -210,7 +196,6 @@ function addActionButtons() {
             }
         });
         
-        buttonRow.appendChild(logoutBtn);
         buttonRow.appendChild(clearBtn);
     }
 }
@@ -219,24 +204,20 @@ function addActionButtons() {
 function addHeaderLogoutButton() {
     const container = document.getElementById('calculatorContainer');
     if (container && !document.getElementById('headerLogoutBtn')) {
-        const header = container.querySelector('h1');
-        if (header) {
-            const logoutBtn = document.createElement('button');
-            logoutBtn.id = 'headerLogoutBtn';
-            logoutBtn.className = 'btn btn-secondary';
-            logoutBtn.textContent = 'Wyloguj';
-            logoutBtn.style.cssText = 'position: absolute; top: 20px; right: 20px; padding: 8px 16px; font-size: 14px;';
-            
-            logoutBtn.addEventListener('click', function() {
-                if (confirm('Czy na pewno chcesz się wylogować? Wszystkie dane zostaną utracone.')) {
-                    logout();
-                }
-            });
-            
-            // Make container relative for absolute positioning
-            container.style.position = 'relative';
-            container.insertBefore(logoutBtn, header);
-        }
+        const logoutBtn = document.createElement('button');
+        logoutBtn.id = 'headerLogoutBtn';
+        logoutBtn.className = 'logout-icon-btn';
+        logoutBtn.title = 'Wyloguj';
+        logoutBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`;
+        
+        logoutBtn.addEventListener('click', function() {
+            if (confirm('Czy na pewno chcesz się wylogować?')) {
+                logout();
+            }
+        });
+        
+        container.style.position = 'relative';
+        container.prepend(logoutBtn);
     }
 }
 
