@@ -181,11 +181,20 @@ function logout() {
 
 // Add logout and clear data buttons
 function addActionButtons() {
-    const buttonRow = document.querySelector('.button-row-results:last-of-type');
-    if (buttonRow && !document.getElementById('clearDataBtn')) {
-        // Clear data button
+    // Funkcja pozostawiona pusta - przyciski są teraz w nagłówku
+}
+
+// Also add logout button to the header area
+function addHeaderLogoutButton() {
+    const container = document.getElementById('calculatorContainer');
+    if (container && !document.getElementById('headerLogoutBtn')) {
+        // Stwórz kontener na przyciski
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.style.cssText = 'position: absolute; top: 10px; right: 10px; display: flex; gap: 10px;';
+        
+        // Przycisk czyszczenia danych
         const clearBtn = document.createElement('button');
-        clearBtn.id = 'clearDataBtn';
+        clearBtn.id = 'headerClearBtn';
         clearBtn.className = 'logout-icon-btn';
         clearBtn.title = 'Wyczyść dane';
         clearBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg><span>Wyczyść dane</span>`;
@@ -193,18 +202,11 @@ function addActionButtons() {
         clearBtn.addEventListener('click', function() {
             if (confirm('Czy na pewno chcesz wyczyścić wszystkie dane?')) {
                 clearSavedData();
-                location.reload(); // Reload page to reset form
+                location.reload();
             }
         });
         
-        buttonRow.appendChild(clearBtn);
-    }
-}
-
-// Also add logout button to the header area
-function addHeaderLogoutButton() {
-    const container = document.getElementById('calculatorContainer');
-    if (container && !document.getElementById('headerLogoutBtn')) {
+        // Przycisk wylogowania
         const logoutBtn = document.createElement('button');
         logoutBtn.id = 'headerLogoutBtn';
         logoutBtn.className = 'logout-icon-btn';
@@ -217,8 +219,12 @@ function addHeaderLogoutButton() {
             }
         });
         
+        // Dodaj przyciski do kontenera
+        buttonsContainer.appendChild(clearBtn);
+        buttonsContainer.appendChild(logoutBtn);
+        
         container.style.position = 'relative';
-        container.prepend(logoutBtn);
+        container.prepend(buttonsContainer);
     }
 }
 

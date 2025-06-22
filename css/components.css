@@ -409,9 +409,7 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
 
 /* Logout Icon Button */
 .logout-icon-btn {
-    position: absolute;
-    top: 25px;
-    right: 25px;
+    /* position, top, right usunięte, aby pozycjonowanie było kontrolowane przez kontener flex */
     background: none;
     border: none;
     cursor: pointer;
