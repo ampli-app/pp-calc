@@ -350,6 +350,10 @@ class Calculator {
         if (prevBtn) {
             prevBtn.style.display = 'none';
         }
+        
+        // Oblicz aktualną stopę procentową dla wybranych parametrów
+        this.calculateInterestRate();
+        
         const inputs = this.getPaymentCalculationInputs();
         if (!inputs.isValid) return;
 
