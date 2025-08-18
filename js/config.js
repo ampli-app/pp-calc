@@ -70,6 +70,10 @@ const CONFIG = {
         liniowy: [
             { value: '9', text: '9%' },
             { value: '19', text: '19%' }
+        ],
+        CIT: [
+            { value: '9', text: '9%' },
+            { value: '19', text: '19%' }
         ]
     },
 
