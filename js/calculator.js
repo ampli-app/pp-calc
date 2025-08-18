@@ -121,7 +121,7 @@ class Calculator {
         const monthlyOption = this.elements.settlementSelect.querySelector('option[value="monthly"]');
 
         if (monthlyOption) {
-            if (capitalValue < 10000) {
+            if (capitalValue < 50000) {
                 monthlyOption.disabled = true;
                 if (this.elements.settlementSelect.value === 'monthly') {
                     this.elements.settlementSelect.value = "";
