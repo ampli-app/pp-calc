@@ -695,24 +695,45 @@ class Calculator {
     prepareXIRRCashFlows(inputs, schedule) {
         const cashFlows = [];
         
-        // Initial investment (negative cash flow)
+        // Start from the last day of the transfer month
+        const transferMonth = inputs.transferDate.getMonth();
+        const transferYear = inputs.transferDate.getFullYear();
+        const startDate = new Date(transferYear, transferMonth + 1, 0); // Last day of transfer month
+        
+        // Initial investment (negative cash flow) - use last day of transfer month
         cashFlows.push({
-            date: inputs.transferDate,
+            date: new Date(startDate),
             amount: -inputs.capital
         });
         
-        // Payment cash flows (positive)
+        // Create monthly cash flows for the entire contract period
+        const contractMonths = inputs.months;
+        
+        // Create payment lookup map
+        const paymentMap = new Map();
         schedule.payments.forEach(payment => {
-            cashFlows.push({
-                date: payment.date,
-                amount: payment.amountNetto
-            });
+            const paymentKey = `${payment.date.getFullYear()}-${payment.date.getMonth()}`;
+            paymentMap.set(paymentKey, payment.amountNetto);
         });
         
+        // Generate cash flows for each month of the contract
+        for (let month = 1; month <= contractMonths; month++) {
+            // Create new date for each month
+            const monthDate = new Date(transferYear, transferMonth + 1 + month, 0); // Last day of each month
+            
+            const monthKey = `${monthDate.getFullYear()}-${monthDate.getMonth()}`;
+            const amount = paymentMap.get(monthKey) || 0;
+            
+            cashFlows.push({
+                date: monthDate,
+                amount: amount
+            });
+        }
+        
         // Debug: Log cash flows for comparison with Excel
-        console.log('XIRR Cash Flows:', cashFlows.map(cf => ({
-            date: cf.date.toISOString().split('T')[0],
-            amount: cf.amount
+        console.log('XIRR Cash Flows (Excel format):', cashFlows.map(cf => ({
+            date: `${cf.date.getMonth() + 1}/${cf.date.getDate()}/${cf.date.getFullYear()}`,
+            amount: cf.amount.toFixed(2)
         })));
         
         return cashFlows;
