@@ -487,7 +487,7 @@ class Calculator {
         if (!monthConfig) {
             return taxForm === 'liniowy' ? 25.0 : 60.0;
         }
-        return monthConfig[taxForm] || (taxForm === 'liniowy' ? 25.0 : 60.0);
+        return monthConfig.hasOwnProperty(taxForm) ? monthConfig[taxForm] : (taxForm === 'liniowy' ? 25.0 : 60.0);
     }
 
     calculateFinalInterestRate(baseRate, multipliers) {
