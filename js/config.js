@@ -24,8 +24,8 @@ const CONFIG = {
             12: 0.9700,
             18: 0.9800,
             24: 0.9900,
-            30: 1.0500,
-            36: 1.0850,
+            30: 1.0690,
+            36: 1.1305,
             48: 1.1520
         },
 
@@ -79,7 +79,7 @@ const CONFIG = {
 
     // Bonus calculation
     BONUS: {
-        RATE: 0.005, // 0.5% of capital
+        RATE: 0.01, // 4% annually for first quarter (4%/12*3 = 1% of capital)
         DEADLINE_DAY: 15, // Must transfer before 15th day of month
         MONTHS_DELAY: 3 // Bonus paid 3 months after start date
     },
