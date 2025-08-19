@@ -675,6 +675,12 @@ class Calculator {
         document.getElementById('capitalAmount').textContent = Utils.formatCurrency(inputs.capital);
         document.getElementById('contractPeriod').textContent = inputs.months + ' miesięcy';
         document.getElementById('interestRateValue').textContent = parseFloat(inputs.interestRate).toFixed(2) + '%';
+        
+        // Calculate and display XIRR
+        const xirrCashFlows = this.prepareXIRRCashFlows(inputs, schedule);
+        const xirrValue = Utils.calculateXIRR(xirrCashFlows);
+        document.getElementById('xirrValue').textContent = (xirrValue * 100).toFixed(2) + '%';
+        
         document.getElementById('settlementType').textContent = schedule.settlementText;
         
         // Calculate margins
@@ -684,6 +690,32 @@ class Calculator {
         document.getElementById('totalPayments').textContent = Utils.formatCurrency(schedule.totalPayments);
         document.getElementById('partnerMargin').textContent = Utils.formatCurrency(partnerMargin);
         document.getElementById('totalMarginPercent').textContent = totalMarginPercent.toFixed(2) + '%';
+    }
+
+    prepareXIRRCashFlows(inputs, schedule) {
+        const cashFlows = [];
+        
+        // Initial investment (negative cash flow)
+        cashFlows.push({
+            date: inputs.transferDate,
+            amount: -inputs.capital
+        });
+        
+        // Payment cash flows (positive)
+        schedule.payments.forEach(payment => {
+            cashFlows.push({
+                date: payment.date,
+                amount: payment.amountNetto
+            });
+        });
+        
+        // Debug: Log cash flows for comparison with Excel
+        console.log('XIRR Cash Flows:', cashFlows.map(cf => ({
+            date: cf.date.toISOString().split('T')[0],
+            amount: cf.amount
+        })));
+        
+        return cashFlows;
     }
 
     generateScheduleTable(schedule) {

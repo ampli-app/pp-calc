@@ -84,6 +84,64 @@ const Utils = {
     },
 
     /**
+     * Calculate Extended Internal Rate of Return (XIRR) using Newton-Raphson method
+     * @param {Array} cashFlows - Array of objects with {date: Date, amount: number}
+     * @param {number} guess - Initial guess (default: 0.1)
+     * @returns {number} XIRR value
+     */
+    calculateXIRR(cashFlows, guess = CONFIG.IRR.DEFAULT_GUESS) {
+        const maxIterations = CONFIG.IRR.MAX_ITERATIONS;
+        const tolerance = CONFIG.IRR.TOLERANCE;
+        
+        if (cashFlows.length < 2) return 0;
+        
+        // Sort cash flows by date
+        const sortedCashFlows = [...cashFlows].sort((a, b) => a.date - b.date);
+        const firstDate = sortedCashFlows[0].date;
+        
+        console.log('XIRR Debug - First date:', firstDate.toISOString().split('T')[0]);
+        console.log('XIRR Debug - Sorted cash flows:', sortedCashFlows.map(cf => ({
+            date: cf.date.toISOString().split('T')[0],
+            amount: cf.amount,
+            daysDiff: (cf.date - firstDate) / (1000 * 60 * 60 * 24)
+        })));
+        
+        let rate = guess;
+        
+        for (let i = 0; i < maxIterations; i++) {
+            let npv = 0;
+            let derivativeNpv = 0;
+            
+            for (const cashFlow of sortedCashFlows) {
+                const daysDiff = (cashFlow.date - firstDate) / (1000 * 60 * 60 * 24);
+                const yearsDiff = daysDiff / 365; // Use 365 instead of 365.25 to match Excel
+                
+                const discountFactor = Math.pow(1 + rate, yearsDiff);
+                npv += cashFlow.amount / discountFactor;
+                derivativeNpv -= yearsDiff * cashFlow.amount / Math.pow(1 + rate, yearsDiff + 1);
+            }
+            
+            console.log(`XIRR Iteration ${i}: rate=${rate.toFixed(6)}, npv=${npv.toFixed(6)}`);
+            
+            // Apply Newton-Raphson method to find zero
+            if (Math.abs(derivativeNpv) < tolerance) break;
+            
+            const newRate = rate - npv / derivativeNpv;
+            
+            // Check for convergence
+            if (Math.abs(newRate - rate) < tolerance) {
+                console.log(`XIRR Converged at iteration ${i}: ${newRate.toFixed(6)}`);
+                return newRate;
+            }
+            
+            rate = newRate;
+        }
+        
+        console.log(`XIRR Final result: ${rate.toFixed(6)}`);
+        return rate;
+    },
+
+    /**
      * Get capital multiplier based on capital amount
      * @param {number} capital - Capital amount
      * @returns {number} Multiplier value
