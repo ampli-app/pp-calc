@@ -316,7 +316,7 @@ class PDFGenerator {
             table: {
                 widths: ['*', 'auto'],
                 body: [[
-                    { text: 'Łączna kwota netto marży:', style: 'summaryLabel' },
+                    { text: 'Suma wypłat netto:', style: 'summaryLabel' },
                     { text: totalPaymentsText, style: 'summaryValue' }
                 ]]
             },
