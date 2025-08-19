@@ -119,6 +119,7 @@ class Calculator {
     handleCapitalChange() {
         const capitalValue = parseInt(this.elements.capitalInput.value, 10) || 0;
         const monthlyOption = this.elements.settlementSelect.querySelector('option[value="monthly"]');
+        const annualOption = this.elements.settlementSelect.querySelector('option[value="annual"]');
 
         if (monthlyOption) {
             if (capitalValue < 50000) {
@@ -129,6 +130,18 @@ class Calculator {
                 }
             } else {
                 monthlyOption.disabled = false;
+            }
+        }
+
+        if (annualOption) {
+            if (capitalValue > 100000) {
+                annualOption.disabled = true;
+                if (this.elements.settlementSelect.value === 'annual') {
+                    this.elements.settlementSelect.value = "";
+                    this.elements.settlementSelect.dispatchEvent(new Event('change'));
+                }
+            } else {
+                annualOption.disabled = false;
             }
         }
     }
