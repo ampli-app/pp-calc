@@ -1,6 +1,6 @@
 /**
  * LoginManager Module
- * Handles login functionality and view switching between login and calculator
+ * Handles login functionality and view switching between login, contract selection and calculator
  */
 class LoginManager {
     constructor(config = {}) {
@@ -12,11 +12,15 @@ class LoginManager {
             // DOM element IDs
             elements: {
                 loginContainer: 'loginContainer',
+                contractSelectionContainer: 'contractSelectionContainer',
                 calculatorContainer: 'calculatorContainer',
                 loginBtn: 'loginBtn',
                 usernameInput: 'username',
                 passwordInput: 'password',
-                loginError: 'loginError'
+                loginError: 'loginError',
+                newContractCard: 'newContractCard',
+                extensionCard: 'extensionCard',
+                backToContractSelection: 'backToContractSelection'
             },
             
             // Session storage key
@@ -46,7 +50,7 @@ class LoginManager {
         
         // Check if user is already logged in
         if (this.isLoggedIn()) {
-            this.showCalculator();
+            this.showContractSelection();
             if (this.onLoginSuccess) {
                 this.onLoginSuccess();
             }
@@ -56,6 +60,7 @@ class LoginManager {
 
         // Setup login form
         this.setupLoginForm();
+        this.setupContractSelection();
         this.showLogin();
         
         this.isInitialized = true;
@@ -108,6 +113,38 @@ class LoginManager {
     }
 
     /**
+     * Setup contract selection event listeners
+     */
+    setupContractSelection() {
+        if (!this.elements.newContractCard) {
+            console.error('New contract card not found');
+            return;
+        }
+
+        if (!this.elements.extensionCard) {
+            console.error('Extension card not found');
+            return;
+        }
+
+        // New contract card click handler
+        this.elements.newContractCard.addEventListener('click', () => {
+            this.showCalculator();
+        });
+
+        // Extension card click handler
+        this.elements.extensionCard.addEventListener('click', () => {
+            this.showCalculator();
+        });
+
+        // Back to contract selection button click handler
+        if (this.elements.backToContractSelection) {
+            this.elements.backToContractSelection.addEventListener('click', () => {
+                this.showContractSelection();
+            });
+        }
+    }
+
+    /**
      * Handle login attempt
      */
     handleLogin() {
@@ -147,8 +184,8 @@ class LoginManager {
         // Set session
         this.setSession();
         
-        // Hide login, show calculator
-        this.showCalculator();
+        // Hide login, show contract selection
+        this.showContractSelection();
         
         // Clear any error messages
         this.hideLoginError();
@@ -168,6 +205,24 @@ class LoginManager {
         if (this.elements.loginContainer) {
             this.elements.loginContainer.classList.remove('hidden');
         }
+        if (this.elements.contractSelectionContainer) {
+            this.elements.contractSelectionContainer.classList.add('hidden');
+        }
+        if (this.elements.calculatorContainer) {
+            this.elements.calculatorContainer.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Show contract selection container
+     */
+    showContractSelection() {
+        if (this.elements.loginContainer) {
+            this.elements.loginContainer.classList.add('hidden');
+        }
+        if (this.elements.contractSelectionContainer) {
+            this.elements.contractSelectionContainer.classList.remove('hidden');
+        }
         if (this.elements.calculatorContainer) {
             this.elements.calculatorContainer.classList.add('hidden');
         }
@@ -179,6 +234,9 @@ class LoginManager {
     showCalculator() {
         if (this.elements.loginContainer) {
             this.elements.loginContainer.classList.add('hidden');
+        }
+        if (this.elements.contractSelectionContainer) {
+            this.elements.contractSelectionContainer.classList.add('hidden');
         }
         if (this.elements.calculatorContainer) {
             this.elements.calculatorContainer.classList.remove('hidden');

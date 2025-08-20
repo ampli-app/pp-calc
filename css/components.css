@@ -450,3 +450,171 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
 .tax-column {
     display: none;
 }
+
+/* Contract Selection Components */
+.contract-selection-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+    text-align: center;
+}
+
+.contract-selection-container h1 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xl);
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-bold);
+}
+
+.contract-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+}
+
+.contract-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+
+.contract-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.contract-card:hover::before {
+    transform: scaleX(1);
+}
+
+.contract-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-premium);
+    border-color: var(--primary-solid);
+}
+
+.contract-card .card-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--spacing-lg);
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.contract-card .card-icon svg {
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+.contract-card:hover .card-icon {
+    transform: scale(1.1);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.contract-card:hover .card-icon svg {
+    transform: scale(1.1);
+}
+
+.contract-card h3 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.contract-card p {
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Responsive design for contract cards */
+@media (max-width: 768px) {
+    .contract-cards {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    .contract-card {
+        padding: var(--spacing-lg);
+    }
+    
+    .contract-card .card-icon {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* Calculator Header Components */
+.calculator-header {
+    position: relative;
+    margin-bottom: var(--spacing-lg);
+}
+
+.back-to-selection-btn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: none;
+    border: 2px solid var(--border-light);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.back-to-selection-btn svg {
+    transition: transform 0.3s ease;
+}
+
+.back-to-selection-btn:hover {
+    border-color: var(--primary-solid);
+    color: var(--primary-solid);
+    background: rgba(102, 126, 234, 0.05);
+    transform: translateY(-2px);
+}
+
+.back-to-selection-btn:hover svg {
+    transform: translateX(-2px);
+}
+
+/* Responsive adjustments for calculator header */
+@media (max-width: 768px) {
+    .calculator-header {
+        text-align: center;
+    }
+    
+    .back-to-selection-btn {
+        position: static;
+        margin: 0 auto var(--spacing-md);
+        display: inline-flex;
+    }
+}
