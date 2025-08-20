@@ -267,6 +267,21 @@ function addHeaderLogoutButton() {
         const buttonsContainer = document.createElement('div');
         buttonsContainer.style.cssText = 'position: absolute; top: 10px; right: 10px; display: flex; gap: 10px;';
         
+        // Przycisk powrotu do wyboru kontraktu
+        const backBtn = document.createElement('button');
+        backBtn.id = 'headerBackBtn';
+        backBtn.className = 'logout-icon-btn';
+        backBtn.title = 'Wróć do wyboru typu kontraktu';
+        backBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Wróć</span>`;
+        
+        backBtn.addEventListener('click', function() {
+            if (loginManager) {
+                loginManager.showContractSelection();
+            } else {
+                console.error('LoginManager not available');
+            }
+        });
+        
         // Przycisk czyszczenia danych
         const clearBtn = document.createElement('button');
         clearBtn.id = 'headerClearBtn';
@@ -295,6 +310,7 @@ function addHeaderLogoutButton() {
         });
         
         // Dodaj przyciski do kontenera
+        buttonsContainer.appendChild(backBtn);
         buttonsContainer.appendChild(clearBtn);
         buttonsContainer.appendChild(logoutBtn);
         

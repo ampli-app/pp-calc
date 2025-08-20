@@ -19,8 +19,7 @@ class LoginManager {
                 passwordInput: 'password',
                 loginError: 'loginError',
                 newContractCard: 'newContractCard',
-                extensionCard: 'extensionCard',
-                backToContractSelection: 'backToContractSelection'
+                extensionCard: 'extensionCard'
             },
             
             // Session storage key
@@ -116,6 +115,17 @@ class LoginManager {
      * Setup contract selection event listeners
      */
     setupContractSelection() {
+        // Remove existing event listeners to prevent duplicates
+        if (this.elements.newContractCard) {
+            this.elements.newContractCard.replaceWith(this.elements.newContractCard.cloneNode(true));
+            this.elements.newContractCard = document.getElementById('newContractCard');
+        }
+
+        if (this.elements.extensionCard) {
+            this.elements.extensionCard.replaceWith(this.elements.extensionCard.cloneNode(true));
+            this.elements.extensionCard = document.getElementById('extensionCard');
+        }
+
         if (!this.elements.newContractCard) {
             console.error('New contract card not found');
             return;
@@ -135,13 +145,6 @@ class LoginManager {
         this.elements.extensionCard.addEventListener('click', () => {
             this.showCalculator();
         });
-
-        // Back to contract selection button click handler
-        if (this.elements.backToContractSelection) {
-            this.elements.backToContractSelection.addEventListener('click', () => {
-                this.showContractSelection();
-            });
-        }
     }
 
     /**
@@ -226,6 +229,9 @@ class LoginManager {
         if (this.elements.calculatorContainer) {
             this.elements.calculatorContainer.classList.add('hidden');
         }
+        
+        // Re-setup contract selection event listeners when showing the screen
+        this.setupContractSelection();
     }
 
     /**
