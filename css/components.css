@@ -460,10 +460,18 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
 }
 
 .contract-selection-container h1 {
-    color: var(--text-primary);
+    color: white !important;
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    -webkit-text-fill-color: white !important;
+    background-clip: unset !important;
     margin-bottom: var(--spacing-xl);
     font-size: var(--font-size-xxl);
     font-weight: var(--font-weight-bold);
+}
+
+.contract-selection-container h1::after {
+    background: white !important;
 }
 
 .contract-cards {
@@ -493,7 +501,7 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--primary);
+    background: white;
     transform: scaleX(0);
     transition: transform 0.3s ease;
 }
@@ -503,9 +511,9 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
 }
 
 .contract-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-premium);
-    border-color: var(--primary-solid);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-subtle);
+    border-color: var(--primary-light);
 }
 
 .contract-card .card-icon {
@@ -563,4 +571,22 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
         width: 60px;
         height: 60px;
     }
+}
+
+/* Logo Container for Contract Selection */
+.logo-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-subtle);
+    margin: 0 auto var(--spacing-xl);
+    width: fit-content;
+    transition: all 0.3s ease;
+}
+
+.logo-container:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-premium);
 }

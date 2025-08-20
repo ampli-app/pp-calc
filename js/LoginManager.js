@@ -138,13 +138,53 @@ class LoginManager {
 
         // New contract card click handler
         this.elements.newContractCard.addEventListener('click', () => {
+            this.setContractType('new');
             this.showCalculator();
         });
 
         // Extension card click handler
         this.elements.extensionCard.addEventListener('click', () => {
+            this.setContractType('extension');
             this.showCalculator();
         });
+    }
+
+    /**
+     * Set contract type and store in session
+     * @param {string} contractType - Type of contract ('new' or 'extension')
+     */
+    setContractType(contractType) {
+        try {
+            sessionStorage.setItem('contractType', contractType);
+            console.log(`Contract type set to: ${contractType}`);
+            
+            // Update month options based on contract type
+            this.updateMonthOptions(contractType);
+        } catch (error) {
+            console.error('Error setting contract type:', error);
+        }
+    }
+
+    /**
+     * Update month options based on contract type
+     * @param {string} contractType - Type of contract ('new' or 'extension')
+     */
+    updateMonthOptions(contractType) {
+        const monthsSelect = document.getElementById('months');
+        if (!monthsSelect) return;
+
+        const option12 = monthsSelect.querySelector('option[value="12"]');
+        const option18 = monthsSelect.querySelector('option[value="18"]');
+
+        if (contractType === 'new') {
+            // Hide 12 and 18 month options for new contracts
+            if (option12) option12.style.display = 'none';
+            if (option18) option18.style.display = 'none';
+        } else {
+            // Show all options for extensions
+            if (option12) option12.style.display = '';
+            if (option18) option18.style.display = '';
+        }
     }
 
     /**
@@ -246,6 +286,12 @@ class LoginManager {
         }
         if (this.elements.calculatorContainer) {
             this.elements.calculatorContainer.classList.remove('hidden');
+        }
+        
+        // Apply contract type restrictions when showing calculator
+        const contractType = sessionStorage.getItem('contractType');
+        if (contractType) {
+            this.updateMonthOptions(contractType);
         }
     }
 
