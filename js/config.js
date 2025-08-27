@@ -45,12 +45,12 @@ const CONFIG = {
 
     // Final payment percentages based on months and tax form
     FINAL_PAYMENT_PERCENT: {
-        12: { liniowy: 75.0, ryczalt: 100.0 },
-        18: { liniowy: 62.5, ryczalt: 90.0 },
-        24: { liniowy: 50.0, ryczalt: 80.0 },
-        30: { liniowy: 37.5, ryczalt: 70.0 },
-        36: { liniowy: 25.0, ryczalt: 60.0 },
-        48: { liniowy: 0.0, ryczalt: 40.0 }
+        12: { liniowy: 75.0, ryczalt: 100.0, CIT: 75.0 },
+        18: { liniowy: 62.5, ryczalt: 90.0, CIT: 62.5 },
+        24: { liniowy: 50.0, ryczalt: 80.0, CIT: 50.0 },
+        30: { liniowy: 37.5, ryczalt: 70.0, CIT: 37.5 },
+        36: { liniowy: 25.0, ryczalt: 60.0, CIT: 25.0 },
+        48: { liniowy: 0.0, ryczalt: 40.0, CIT: 0.0 }
     },
 
     // Settlement frequency mapping
