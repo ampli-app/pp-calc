@@ -107,6 +107,11 @@ class Calculator {
             this.elements.capitalInput.addEventListener('input', () => this.handleCapitalChange());
         }
 
+        // Add bonus notification handler for transfer date
+        if (this.elements.transferDate) {
+            this.elements.transferDate.addEventListener('change', () => this.handleTransferDateChange());
+        }
+
         // Interest rate calculation triggers
         ['baseInterestRate', 'months', 'capital', 'settlement', 'taxForm', 'taxRate'].forEach(id => {
             const element = document.getElementById(id);
@@ -493,6 +498,25 @@ class Calculator {
     calculateFinalInterestRate(baseRate, multipliers) {
         return baseRate * multipliers.multiplierMonths * multipliers.multiplierCapital * 
                multipliers.multiplierFinalPayment * multipliers.multiplierFreq;
+    }
+
+    handleTransferDateChange() {
+        const transferDate = new Date(this.elements.transferDate.value);
+        const bonusNotification = document.getElementById('bonusNotification');
+        
+        if (!bonusNotification || !this.elements.transferDate.value) {
+            return;
+        }
+
+        // Check if transfer date is before or on 15th day of month
+        const transferDay = transferDate.getDate();
+        const isBonusApplicable = transferDay <= CONFIG.BONUS.DEADLINE_DAY;
+
+        if (isBonusApplicable) {
+            bonusNotification.classList.remove('hidden');
+        } else {
+            bonusNotification.classList.add('hidden');
+        }
     }
 
     calculateInterestRate() {

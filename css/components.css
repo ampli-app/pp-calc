@@ -590,3 +590,57 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
     transform: translateY(-2px);
     box-shadow: var(--shadow-premium);
 }
+
+/* Bonus Notification Styles */
+.bonus-notification {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: var(--text-primary);
+    padding: var(--spacing-md);
+    border-radius: 8px;
+    margin-top: var(--spacing-sm);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    animation: slideInDown 0.3s ease-out;
+}
+
+.bonus-notification.hidden {
+    display: none;
+}
+
+.bonus-text {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.bonus-text strong {
+    display: inline;
+    font-size: var(--font-size-base);
+    margin-right: var(--spacing-sm);
+    color: var(--text-primary);
+}
+
+.bonus-icon {
+    font-size: 20px;
+    margin-right: var(--spacing-sm);
+}
+
+.bonus-text p {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    width: 100%;
+    margin-top: 4px;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
