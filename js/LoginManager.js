@@ -175,15 +175,24 @@ class LoginManager {
 
         const option12 = monthsSelect.querySelector('option[value="12"]');
         const option18 = monthsSelect.querySelector('option[value="18"]');
+        const option48 = monthsSelect.querySelector('option[value="48"]');
 
         if (contractType === 'new') {
             // Hide 12 and 18 month options for new contracts
             if (option12) option12.style.display = 'none';
             if (option18) option18.style.display = 'none';
+            if (option48) option48.style.display = '';
         } else {
-            // Show all options for extensions
+            // For extensions: show 12 and 18 month options, hide 48 months
             if (option12) option12.style.display = '';
             if (option18) option18.style.display = '';
+            if (option48) option48.style.display = 'none';
+            
+            // If 48 months was selected, reset to empty
+            if (monthsSelect.value === '48') {
+                monthsSelect.value = '';
+                monthsSelect.dispatchEvent(new Event('change'));
+            }
         }
     }
 
