@@ -76,8 +76,8 @@ const CONFIG = {
             { value: '19', text: '19%' }
         ],
         'zasady ogólne': [
-            { value: '9', text: '9%' },
-            { value: '19', text: '19%' }
+            { value: '12', text: '12%' },
+            { value: '32', text: '32%' }
         ]
     },
 

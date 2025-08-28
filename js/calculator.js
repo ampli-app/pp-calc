@@ -527,8 +527,9 @@ class Calculator {
         const multipliers = this.getMultipliers(inputs);
         const interestRate = this.calculateFinalInterestRate(inputs.baseInterestRate, multipliers);
         
-        // Update final payment percentage
-        inputs.finalPaymentElement.value = multipliers.finalPaymentPercent;
+        // Always recalculate and update final payment percentage (no caching)
+        const freshFinalPaymentPercent = this.getFinalPaymentPercent(inputs.months, inputs.taxForm);
+        inputs.finalPaymentElement.value = freshFinalPaymentPercent;
         
         const interestRateElement = document.getElementById('interestRate');
         if (interestRateElement) {
