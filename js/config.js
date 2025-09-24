@@ -81,6 +81,16 @@ const CONFIG = {
         ]
     },
 
+    // Revshare percentages based on months
+    REVSHARE_PERCENTAGES: {
+        12: 45.0,
+        18: 47.5,
+        24: 50.0,
+        30: 55.0,
+        36: 55.0,
+        48: 60.0
+    },
+
     // Bonus calculation
     BONUS: {
         RATE: 0.01, // 4% annually for first quarter (4%/12*3 = 1% of capital)

@@ -340,7 +340,44 @@ class Calculator {
             step.classList.toggle('active', parseInt(step.dataset.step) === this.currentStep);
         });
 
+        // Update Revshare percentage display when entering step 4
+        if (stepNumber === 4) {
+            this.updateRevshareDisplay();
+        }
        
+    }
+
+    updateRevshareDisplay() {
+        const cooperationForm = document.getElementById('cooperationForm').value;
+        const monthsSelect = document.getElementById('months');
+        const revshareRow = document.getElementById('revshareRow');
+        const revshareInput = document.getElementById('revsharePercentageInput');
+        const fixFieldsRow = document.getElementById('fixFieldsRow');
+        
+        if (cooperationForm === 'revshare') {
+            // Hide Fix fields (IRR and Final Payment)
+            fixFieldsRow.style.display = 'none';
+            
+            // Show Revshare field if months are selected
+            if (monthsSelect.value) {
+                const months = parseInt(monthsSelect.value);
+                const percentage = CONFIG.REVSHARE_PERCENTAGES[months];
+                
+                if (percentage) {
+                    revshareInput.value = percentage + '%';
+                    revshareRow.style.display = 'block';
+                } else {
+                    revshareRow.style.display = 'none';
+                }
+            } else {
+                revshareRow.style.display = 'none';
+            }
+        } else {
+            // Show Fix fields (IRR and Final Payment)
+            fixFieldsRow.style.display = 'block';
+            // Hide Revshare field
+            revshareRow.style.display = 'none';
+        }
     }
 
     handleTaxFormChange() {
