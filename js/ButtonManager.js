@@ -26,7 +26,7 @@ class ButtonManager {
             },
             
             // Step configuration
-            totalSteps: 3,
+            totalSteps: 4,
             
             // Button texts
             texts: {
@@ -205,7 +205,7 @@ class ButtonManager {
     // Show form
     this.showForm();
     
-    // Reset to the last step (step 3) where user can modify data
+    // Reset to the last step (step 4) where user can modify data
     this.currentStep = this.config.totalSteps;
     this.navigateToStep(this.currentStep);
     
@@ -231,7 +231,7 @@ class ButtonManager {
         scheduleBody.innerHTML = '';
     }
     
-    console.log('Returned to form editing mode at step 3');
+    console.log('Returned to form editing mode at step 4');
 }
 
     /**
@@ -449,8 +449,18 @@ validateCurrentStep() {
         return false;
     }
 
+    // Special handling for cooperation form step (step 3)
+    if (this.currentStep === 3) {
+        const cooperationForm = document.getElementById('cooperationForm');
+        if (!cooperationForm || !cooperationForm.value) {
+            alert('Proszę wybrać formę współpracy');
+            return false;
+        }
+        return true;
+    }
+    
     // Sprawdź tylko widoczne pola (element może być ukryty ale nadal w DOM)
-    const requiredFields = currentSection.querySelectorAll('input:not([disabled]), select:not([disabled])');
+    const requiredFields = currentSection.querySelectorAll('input:not([disabled]):not([type="hidden"]), select:not([disabled])');
     for (let field of requiredFields) {
         // Sprawdź tylko jeśli pole jest widoczne
         if (field.offsetParent !== null && !field.value.trim()) {

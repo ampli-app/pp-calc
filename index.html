@@ -66,7 +66,8 @@
         <div class="progress-bar">
             <div class="progress-step active" data-step="1">Dane firmy</div>
             <div class="progress-step" data-step="2">Warunki finansowania</div>
-            <div class="progress-step" data-step="3">Wyniki</div>
+            <div class="progress-step" data-step="3">Forma współpracy</div>
+            <div class="progress-step" data-step="4">Wyniki</div>
         </div>
         
         <div class="form">
@@ -152,6 +153,25 @@
             </div>
 
             <div class="form-step" data-step="3">
+                <div class="cooperation-form-selection">
+                    <h2>Wybierz formę współpracy</h2>
+                    <div class="cooperation-buttons">
+                        <button type="button" class="cooperation-btn" data-value="fix" id="fixBtn">
+                            <div class="cooperation-icon">💰</div>
+                            <h3>Fix</h3>
+                            <p>Stała stopa zwrotu</p>
+                        </button>
+                        <button type="button" class="cooperation-btn" data-value="revshare" id="revshareBtn">
+                            <div class="cooperation-icon">📈</div>
+                            <h3>Revshare</h3>
+                            <p>Udział w przychodach</p>
+                        </button>
+                    </div>
+                    <input type="hidden" id="cooperationForm" value="">
+                </div>
+            </div>
+
+            <div class="form-step" data-step="4">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="interestRate">IRR (dla całości kapitału):</label>

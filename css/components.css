@@ -645,3 +645,120 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
         transform: translateY(0);
     }
 }
+
+/* Cooperation Form Selection Styles */
+.cooperation-form-selection {
+    text-align: center;
+    padding: var(--spacing-lg) 0;
+}
+
+.cooperation-form-selection h2 {
+    color: var(--text-primary);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-xl);
+    background: var(--primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.cooperation-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.cooperation-btn {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    font-family: inherit;
+}
+
+.cooperation-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--border-light);
+    transform: scaleX(0);
+    transition: all 0.3s ease;
+}
+
+.cooperation-btn:hover::before {
+    transform: scaleX(1);
+    background: var(--primary);
+}
+
+.cooperation-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-premium);
+    border-color: var(--primary-light);
+}
+
+.cooperation-btn.selected {
+    border-color: var(--primary-solid);
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-premium);
+}
+
+.cooperation-btn.selected::before {
+    transform: scaleX(1);
+    background: var(--primary);
+}
+
+.cooperation-icon {
+    font-size: 48px;
+    margin-bottom: var(--spacing-md);
+    display: block;
+}
+
+.cooperation-btn h3 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.cooperation-btn p {
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.cooperation-btn.selected h3 {
+    background: var(--primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Responsive design for cooperation buttons */
+@media (max-width: 768px) {
+    .cooperation-buttons {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    .cooperation-btn {
+        padding: var(--spacing-lg);
+    }
+    
+    .cooperation-icon {
+        font-size: 36px;
+    }
+}

@@ -20,6 +20,9 @@ class Calculator {
             companyNameInput: document.getElementById('companyName'),
             taxFormSelect: document.getElementById('taxForm'),
             taxRateSelect: document.getElementById('taxRate'),
+            cooperationForm: document.getElementById('cooperationForm'),
+            fixBtn: document.getElementById('fixBtn'),
+            revshareBtn: document.getElementById('revshareBtn'),
             transferDate: document.getElementById('transferDate'),
             capitalInput: document.getElementById('capital'),
             monthsSelect: document.getElementById('months'),
@@ -52,6 +55,14 @@ class Calculator {
         this.elements.progressSteps.forEach(step => {
             step.addEventListener('click', () => this.goToStep(parseInt(step.dataset.step)));
         });
+
+        // Cooperation form buttons
+        if (this.elements.fixBtn) {
+            this.elements.fixBtn.addEventListener('click', () => this.handleCooperationFormSelect('fix'));
+        }
+        if (this.elements.revshareBtn) {
+            this.elements.revshareBtn.addEventListener('click', () => this.handleCooperationFormSelect('revshare'));
+        }
 
         // Original event bindings
         if (this.elements.taxFormSelect) {
@@ -121,6 +132,52 @@ class Calculator {
         });
     }
 
+    handleCooperationFormSelect(formType) {
+        // Remove selected class from all buttons
+        this.elements.fixBtn.classList.remove('selected');
+        this.elements.revshareBtn.classList.remove('selected');
+        
+        // Add selected class to clicked button
+        if (formType === 'fix') {
+            this.elements.fixBtn.classList.add('selected');
+        } else if (formType === 'revshare') {
+            this.elements.revshareBtn.classList.add('selected');
+        }
+        
+        // Set the hidden input value
+        this.elements.cooperationForm.value = formType;
+        
+        // Clear any previous validation errors
+        this._clearCooperationFormError();
+    }
+
+    _clearCooperationFormError() {
+        const cooperationSection = document.querySelector('.cooperation-form-selection');
+        if (cooperationSection) {
+            const errorElement = cooperationSection.querySelector('.error-message');
+            if (errorElement) {
+                errorElement.remove();
+            }
+        }
+    }
+
+    _showCooperationFormError(message) {
+        const cooperationSection = document.querySelector('.cooperation-form-selection');
+        if (cooperationSection) {
+            // Clear any existing error first
+            this._clearCooperationFormError();
+            
+            // Create and add error message
+            const errorElement = document.createElement('p');
+            errorElement.textContent = message;
+            errorElement.className = 'error-message';
+            errorElement.style.color = '#f5576c';
+            errorElement.style.marginTop = '15px';
+            errorElement.style.fontWeight = '600';
+            cooperationSection.appendChild(errorElement);
+        }
+    }
+
     handleCapitalChange() {
         const capitalValue = parseInt(this.elements.capitalInput.value, 10) || 0;
         const monthlyOption = this.elements.settlementSelect.querySelector('option[value="monthly"]');
@@ -185,6 +242,12 @@ class Calculator {
                     isStepValid = false;
                 }
             });
+        } else if (this.currentStep === 3) {
+            // Validate cooperation form selection
+            if (!this.elements.cooperationForm.value) {
+                isStepValid = false;
+                this._showCooperationFormError('Proszę wybrać formę współpracy');
+            }
         }
 
         if (isStepValid && this.currentStep < this.elements.formSteps.length) {
@@ -210,8 +273,8 @@ class Calculator {
             formContainer.style.display = 'block';
         }
 
-        // Go back to step 3
-        this.goToStep(3);
+        // Go back to step 4
+        this.goToStep(4);
 
         // Update saved data to reflect the change
         if (typeof saveFormData === 'function') {
