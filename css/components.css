@@ -595,12 +595,13 @@ table tbody tr:hover:not(.highlight):not(.bonus-month) {
 .bonus-notification {
     display: flex;
     align-items: center;
-    background: linear-gradient(135deg, #4CAF50, #45a049);
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
     color: var(--text-primary);
     padding: var(--spacing-md);
     border-radius: 8px;
+    border: 2px solid var(--primary-solid);
     margin-top: var(--spacing-sm);
-    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 2px 8px rgba(9, 13, 46, 0.2);
     animation: slideInDown 0.3s ease-out;
 }
 
